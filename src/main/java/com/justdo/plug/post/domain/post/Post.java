@@ -34,9 +34,9 @@ public class Post extends BaseTimeEntity {
     private boolean state;
 
     @Column(nullable = false, updatable = false)
-    private long blog_id;
+    private Long blog_id;
 
     @Column(nullable = false, updatable = false)
-    private long member_id;
+    private Long member_id;
 
 }
