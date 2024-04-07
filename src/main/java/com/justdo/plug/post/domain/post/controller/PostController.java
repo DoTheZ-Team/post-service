@@ -5,9 +5,11 @@ import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
+import com.justdo.plug.post.domain.post.dto.PostResponseDto;
 import com.justdo.plug.post.domain.post.service.PostService;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import lombok.RequiredArgsConstructor;
+import org.json.JSONException;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -25,7 +27,7 @@ public class PostController {
     private final CategoryService categoryService;
     private final PhotoService photoService;
 
-    // BLOG001: 블로그 리스트 조회
+    // BLOG001: 블로그 리스트 조회 요청
     /* TODO: 서비스 함수 추가 및 return 해주기 */
     @GetMapping()
     public List<PostRequestDto> ViewList(){
@@ -33,11 +35,12 @@ public class PostController {
         return null;
     }
 
-    // BLOG002: 블로그 상세페이지 조회
+    // BLOG002: 블로그 상세페이지 조회 요청
     @GetMapping("{post_id}")
-    public PostRequestDto ViewPage(@PathVariable long post_id){
-        /*service*/
-        return null;
+    public PostResponseDto ViewPage(@PathVariable long post_id) throws JSONException {
+
+        return postService.getPostById(post_id);
+
     }
 
     // BLOG003: 블로그 작성 요청
