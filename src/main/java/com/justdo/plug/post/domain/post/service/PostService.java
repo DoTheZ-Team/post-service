@@ -11,12 +11,21 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
+
+    // BLOG001: 블로그 리스트 조회
+    public List<Post> getAllPosts() {
+
+        return postRepository.findAll();
+
+    }
 
     // BLOG002: 블로그 상세 페이지 조회
     public PostResponseDto getPostById(long post_id) throws JSONException {

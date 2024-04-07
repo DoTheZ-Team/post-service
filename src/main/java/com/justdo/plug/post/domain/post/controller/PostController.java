@@ -28,11 +28,11 @@ public class PostController {
     private final PhotoService photoService;
 
     // BLOG001: 블로그 리스트 조회 요청
-    /* TODO: 서비스 함수 추가 및 return 해주기 */
     @GetMapping()
-    public List<PostRequestDto> ViewList(){
-        /*service*/
-        return null;
+    public List<Post> ViewList(){
+
+        return postService.getAllPosts();
+
     }
 
     // BLOG002: 블로그 상세페이지 조회 요청
