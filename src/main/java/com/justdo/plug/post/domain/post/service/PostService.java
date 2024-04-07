@@ -8,11 +8,9 @@ import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 @Transactional
@@ -26,7 +24,7 @@ public class PostService {
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
 
-        return createPostResponseDto(post);
+        return PostResponseDto.createFromPost(post);
     }
 
     // BLOG003: 블로그 작성
@@ -35,26 +33,5 @@ public class PostService {
             Post post = requestDto.toEntity();
             return postRepository.save(post);
     }
-
-    // SUB: 게시글 반환 함수
-    private PostResponseDto createPostResponseDto(Post post) throws JSONException {
-        String JsonContent = post.getContent();
-        JSONArray jsonArray = new JSONArray(JsonContent);
-        List<Object> list = jsonArray.toList();
-        Object[] array = list.toArray();
-
-        return PostResponseDto.builder()
-                .post_id(post.getId())
-                .title(post.getTitle())
-                .content(array)
-                .temporary_state(post.isTemporary_state())
-                .state(post.isState())
-                .created_at(post.getCreatedAt())
-                .updated_at(post.getUpdatedAt())
-                .member_id(post.getMember_id())
-                .blog_id(post.getBlog_id())
-                .build();
-    }
-
 
 }
