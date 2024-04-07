@@ -4,6 +4,8 @@ import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
+import com.justdo.plug.post.global.exception.ApiException;
+import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
@@ -21,7 +23,8 @@ public class PostService {
     // BLOG002: 블로그 상세 페이지 조회
     public PostResponseDto getPostById(long post_id) throws JSONException {
         Post post = postRepository.findById(post_id)
-                .orElseThrow(() -> new RuntimeException("해당 id의 게시글을 찾을 수 없습니다: " + post_id));
+                .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
+
 
         return createPostResponseDto(post);
     }

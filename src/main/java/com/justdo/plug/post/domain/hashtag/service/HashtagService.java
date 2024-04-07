@@ -18,7 +18,7 @@ public class HashtagService {
 
     public Long getHashtagIdByName(String hashtagName) {
         Hashtag hashtag = Optional.ofNullable(hashtagRepository.findByName(hashtagName))
-                .orElseThrow(() -> new ApiException(ErrorStatus._INTERNAL_SERVER_ERROR));
+                .orElseThrow(() -> new ApiException(ErrorStatus._HASHTAG_NOT_FOUND));
 
         return hashtag.getId();
     }
