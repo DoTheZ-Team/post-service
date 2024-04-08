@@ -27,7 +27,7 @@ public class PostController {
     private final CategoryService categoryService;
     private final PhotoService photoService;
 
-    // BLOG001: 블로그 리스트 조회 요청
+    // BLOG001: 게시글 리스트 조회 요청
     @GetMapping()
     public List<Post> ViewList(){
 
@@ -35,17 +35,17 @@ public class PostController {
 
     }
 
-    // BLOG002: 블로그 상세페이지 조회 요청
+    // BLOG002: 게시글 상세페이지 조회 요청
     @GetMapping("{post_id}")
-    public PostResponseDto ViewPage(@PathVariable long post_id) throws JSONException {
+    public PostResponseDto ViewPage(@PathVariable Long post_id) throws JSONException {
 
         return postService.getPostById(post_id);
 
     }
 
-    // BLOG003: 블로그 작성 요청
+    // BLOG003: 게시글 작성 요청
     @PostMapping("{blog_id}")
-    public String PostBlog(@RequestBody PostRequestDto RequestDto, @PathVariable long blog_id) {
+    public String PostBlog(@RequestBody PostRequestDto RequestDto, @PathVariable Long blog_id) {
 
             // 1. Post 저장
             RequestDto.setBlog_id(blog_id);
@@ -69,18 +69,26 @@ public class PostController {
             return "게시글이 성공적으로 업로드 되었습니다";
     }
 
-    // BLOG004: 블로그 수정 요청
+    // BLOG004: 게시글 수정 요청
     @PatchMapping("{post_id}")
-    public PostRequestDto EditBlog(@PathVariable long post_id){
+    public PostRequestDto EditBlog(@PathVariable Long post_id){
         /*service*/
         return null;
     }
 
-    // BLOG005: 블로그 삭제 요청
+    // BLOG005: 게시글 삭제 요청
     @DeleteMapping("{post_id}")
-    public PostRequestDto DeleteBlog(@PathVariable long post_id){
+    public PostRequestDto DeleteBlog(@PathVariable Long post_id){
         /*service*/
         return null;
+    }
+
+    // BLOG006: 블로그 게시글 리스트 조회 요청
+    @GetMapping("blog/{blog_id}")
+    public List<Post> ViewBlogList(@PathVariable Long blog_id){
+
+        return postService.getBlogPosts(blog_id);
+
     }
 
 }

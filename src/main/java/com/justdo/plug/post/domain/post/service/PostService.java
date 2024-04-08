@@ -20,18 +20,17 @@ import java.util.List;
 public class PostService {
     private final PostRepository postRepository;
 
-    // BLOG001: 블로그 리스트 조회
+    // BLOG001: 게시글 리스트 조회
     public List<Post> getAllPosts() {
 
         return postRepository.findAll();
 
     }
 
-    // BLOG002: 블로그 상세 페이지 조회
-    public PostResponseDto getPostById(long post_id) throws JSONException {
+    // BLOG002: 게시글 상세 페이지 조회
+    public PostResponseDto getPostById(Long post_id) throws JSONException {
         Post post = postRepository.findById(post_id)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
-
 
         return PostResponseDto.createFromPost(post);
     }
@@ -41,6 +40,15 @@ public class PostService {
        
             Post post = requestDto.toEntity();
             return postRepository.save(post);
+    }
+
+    // BLOG006: 블로그 게시글 리스트 조회
+    public List<Post> getBlogPosts(Long blog_id){
+        List<Post> posts = postRepository.findByBlogId(blog_id);
+        if(posts.isEmpty()) {
+            throw new ApiException(ErrorStatus._POST_NOT_FOUND);
+        }
+        return posts;
     }
 
 }
