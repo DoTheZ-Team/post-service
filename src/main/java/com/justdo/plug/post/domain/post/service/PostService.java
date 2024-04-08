@@ -46,7 +46,7 @@ public class PostService {
     public List<Post> getBlogPosts(Long blog_id){
         List<Post> posts = postRepository.findByBlogId(blog_id);
         if(posts.isEmpty()) {
-            throw new ApiException(ErrorStatus._POST_NOT_FOUND);
+            throw new ApiException(ErrorStatus._BLOG_NOT_FOUND);
         }
         return posts;
     }
