@@ -15,19 +15,12 @@ import lombok.Setter;
 public class PostHashtag extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long post_hashtag_id;
+    private Long postHashtagId;
 
     @Column(nullable = false)
-    private Long post_id;
+    private Long postId;
 
     @Column(nullable = false)
-    private Long hashtag_id;
+    private Long hashtagId;
 
-    public void setPostId(Long post_id) {
-        this.post_id = post_id;
-    }
-
-    public void setHashtagId(Long hashtag_id) {
-        this.hashtag_id = hashtag_id;
-    }
 }

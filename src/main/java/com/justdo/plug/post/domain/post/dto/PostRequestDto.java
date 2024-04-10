@@ -11,10 +11,10 @@ public class PostRequestDto {
     private String title;
     private String content;
     private int like_count;
-    private boolean temporary_state;
+    private boolean temporaryState;
     private boolean state;
-    private long member_id;
-    private long blog_id;
+    private long memberId;
+    private long blogId;
     private List<String> hashtags;
     private String name;
     private String photo_url;
@@ -24,10 +24,10 @@ public class PostRequestDto {
         return Post.builder()
                 .title(title)
                 .content(content)
-                .temporary_state(temporary_state)
+                .temporaryState(temporaryState)
                 .state(state)
-                .member_id(member_id)
-                .blog_id(blog_id)
+                .memberId(memberId)
+                .blogId(blogId)
                 .build();
     }
 }

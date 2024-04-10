@@ -11,12 +11,12 @@ import lombok.*;
 public class Category extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long category_id;
+    private Long categoryId;
 
     @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
-    private Long post_id;
+    private Long postId;
 
 }
