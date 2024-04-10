@@ -9,16 +9,16 @@ import java.util.List;
 @Data
 @Builder
 public class PostResponseDto {
-    private Long post_id;
+    private Long postId;
     private String title;
     private Object[] content;
     private int like_count;
-    private boolean temporary_state;
+    private boolean temporaryState;
     private boolean state;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
-    private Long member_id;
-    private Long blog_id;
+    private Long memberId;
+    private Long blogId;
 
     // SUB: 게시글 반환 함수
     public static PostResponseDto createFromPost(Post post) {
@@ -28,16 +28,16 @@ public class PostResponseDto {
         Object[] array = list.toArray();
 
         return PostResponseDto.builder()
-                .post_id(post.getId())
+                .postId(post.getId())
                 .title(post.getTitle())
                 .content(array)
                 .like_count(post.getLike_count())
-                .temporary_state(post.isTemporary_state())
+                .temporaryState(post.isTemporaryState())
                 .state(post.isState())
                 .created_at(post.getCreatedAt())
                 .updated_at(post.getUpdatedAt())
-                .member_id(post.getMember_id())
-                .blog_id(post.getBlog_id())
+                .memberId(post.getMemberId())
+                .blogId(post.getBlogId())
                 .build();
     }
 }

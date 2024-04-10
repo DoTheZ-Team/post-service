@@ -28,15 +28,15 @@ public class Post extends BaseTimeEntity {
     private int like_count;
 
     @Column(nullable = false)
-    private boolean temporary_state;
+    private boolean temporaryState;
 
     @Column(nullable = false)
     private boolean state;
 
     @Column(nullable = false, updatable = false)
-    private Long blog_id;
+    private Long blogId;
 
     @Column(nullable = false, updatable = false)
-    private Long member_id;
+    private Long memberId;
 
 }

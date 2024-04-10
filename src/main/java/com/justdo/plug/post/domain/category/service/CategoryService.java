@@ -15,9 +15,9 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
 
 
-    public void createCategory(String name, Long post_id){
+    public void createCategory(String name, Long postId){
 
-        Category category = Category.builder().name(name).post_id(post_id).build();
+        Category category = Category.builder().name(name).postId(postId).build();
         save(category);
     }
     public void save(Category category){

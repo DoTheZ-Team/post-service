@@ -36,58 +36,58 @@ public class PostController {
     }
 
     // BLOG002: 게시글 상세페이지 조회 요청
-    @GetMapping("{post_id}")
-    public PostResponseDto ViewPage(@PathVariable Long post_id) throws JSONException {
+    @GetMapping("{postId}")
+    public PostResponseDto ViewPage(@PathVariable Long postId) throws JSONException {
 
-        return postService.getPostById(post_id);
+        return postService.getPostById(postId);
 
     }
 
     // BLOG003: 게시글 작성 요청
-    @PostMapping("{blog_id}")
-    public String PostBlog(@RequestBody PostRequestDto RequestDto, @PathVariable Long blog_id) {
+    @PostMapping("{blogId}")
+    public String PostBlog(@RequestBody PostRequestDto RequestDto, @PathVariable Long blogId) {
 
             // 1. Post 저장
-            RequestDto.setBlog_id(blog_id);
+            RequestDto.setBlogId(blogId);
             Post post = postService.save(RequestDto);
 
             // Post 에서 post_id 받아오기
-            Long post_id = post.getId();
+            Long postId = post.getId();
 
             // 2. Post_Hashtag 저장
             List<String> hashtags = RequestDto.getHashtags();
-            postHashtagService.createHashtag(hashtags, post_id);
+            postHashtagService.createHashtag(hashtags, postId);
 
             // 3. Category 저장
             String name = RequestDto.getName(); // '카테고리 명'저장
-            categoryService.createCategory(name, post_id);
+            categoryService.createCategory(name, postId);
 
             // 4. Photo 저장
             String photo_url = RequestDto.getPhoto_url();
-            photoService.createPhoto(photo_url, post_id);
+            photoService.createPhoto(photo_url, postId);
 
             return "게시글이 성공적으로 업로드 되었습니다";
     }
 
     // BLOG004: 게시글 수정 요청
-    @PatchMapping("{post_id}")
-    public PostRequestDto EditBlog(@PathVariable Long post_id){
+    @PatchMapping("{postId}")
+    public PostRequestDto EditBlog(@PathVariable Long postId){
         /*service*/
         return null;
     }
 
     // BLOG005: 게시글 삭제 요청
-    @DeleteMapping("{post_id}")
-    public PostRequestDto DeleteBlog(@PathVariable Long post_id){
+    @DeleteMapping("{postId}")
+    public PostRequestDto DeleteBlog(@PathVariable Long postId){
         /*service*/
         return null;
     }
 
     // BLOG006: 블로그 게시글 리스트 조회 요청
-    @GetMapping("blog/{blog_id}")
-    public List<Post> ViewBlogList(@PathVariable Long blog_id){
+    @GetMapping("blog/{blogId}")
+    public List<Post> ViewBlogList(@PathVariable Long blogId){
 
-        return postService.getBlogPosts(blog_id);
+        return postService.getBlogPosts(blogId);
 
     }
 
