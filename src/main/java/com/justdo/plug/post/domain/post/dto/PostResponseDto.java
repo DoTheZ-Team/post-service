@@ -12,7 +12,7 @@ public class PostResponseDto {
     private Long postId;
     private String title;
     private Object[] content;
-    private int like_count;
+    private int likeCount;
     private boolean temporaryState;
     private boolean state;
     private LocalDateTime created_at;
@@ -31,7 +31,7 @@ public class PostResponseDto {
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(array)
-                .like_count(post.getLike_count())
+                .likeCount(post.getLike_count())
                 .temporaryState(post.isTemporaryState())
                 .state(post.isState())
                 .created_at(post.getCreatedAt())

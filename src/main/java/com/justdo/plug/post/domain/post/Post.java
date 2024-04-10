@@ -15,7 +15,7 @@ public class Post extends BaseTimeEntity {
 
     @Id
     @GeneratedValue
-    @Column(name = "post_id")
+    @Column(name = "postId")
     private Long id;
 
     @Column(nullable = false)

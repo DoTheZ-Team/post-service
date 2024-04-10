@@ -63,8 +63,8 @@ public class PostController {
             categoryService.createCategory(name, postId);
 
             // 4. Photo 저장
-            String photo_url = RequestDto.getPhoto_url();
-            photoService.createPhoto(photo_url, postId);
+            String photoUrl = RequestDto.getPhotoUrl();
+            photoService.createPhoto(photoUrl, postId);
 
             return "게시글이 성공적으로 업로드 되었습니다";
     }

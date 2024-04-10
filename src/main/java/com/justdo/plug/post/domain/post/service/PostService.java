@@ -28,8 +28,8 @@ public class PostService {
     }
 
     // BLOG002: 게시글 상세 페이지 조회
-    public PostResponseDto getPostById(Long post_id) throws JSONException {
-        Post post = postRepository.findById(post_id)
+    public PostResponseDto getPostById(Long postId) throws JSONException {
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
         return PostResponseDto.createFromPost(post);
@@ -43,8 +43,8 @@ public class PostService {
     }
 
     // BLOG006: 블로그 게시글 리스트 조회
-    public List<Post> getBlogPosts(Long blog_id){
-        List<Post> posts = postRepository.findByBlogId(blog_id);
+    public List<Post> getBlogPosts(Long blogId){
+        List<Post> posts = postRepository.findByBlogId(blogId);
         if(posts.isEmpty()) {
             throw new ApiException(ErrorStatus._BLOG_NOT_FOUND);
         }
