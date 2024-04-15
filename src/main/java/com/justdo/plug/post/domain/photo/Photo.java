@@ -16,12 +16,12 @@ import lombok.Setter;
 public class Photo extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long photo_id;
+    private Long photoId;
 
     @Column(nullable = false)
-    private String photo_url;
+    private String photoUrl;
 
     @Column(nullable = false)
-    private Long post_id;
+    private Long postId;
 
 }

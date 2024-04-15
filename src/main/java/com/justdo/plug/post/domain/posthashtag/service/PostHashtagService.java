@@ -15,17 +15,17 @@ import java.util.List;
 public class PostHashtagService {
     private final PostHashtagRepository postHashtagRepository;
     private final HashtagService hashtagService;
-    public void createHashtag(List<String> hashtags, Long post_id){
+    public void createHashtag(List<String> hashtags, Long postId){
 
         for (String hashtag : hashtags) {
 
             // 해시태그 이름으로 해시태그 ID를 가져오는 메서드
-            Long hashtag_id = hashtagService.getHashtagIdByName(hashtag);
+            Long hashtagId = hashtagService.getHashtagIdByName(hashtag);
 
             // Post_Hashtag 엔티티 생성
             PostHashtag postHashtag = new PostHashtag();
-            postHashtag.setPostId(post_id);
-            postHashtag.setHashtagId(hashtag_id);
+            postHashtag.setPostId(postId);
+            postHashtag.setHashtagId(hashtagId);
 
             // Post_Hashtag 엔티티 저장
             save(postHashtag);

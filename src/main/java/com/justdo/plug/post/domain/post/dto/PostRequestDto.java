@@ -10,14 +10,14 @@ import java.util.List;
 public class PostRequestDto {
     private String title;
     private String content;
-    private int like_count;
+    private int likeCount;
     private boolean temporaryState;
     private boolean state;
     private long memberId;
     private long blogId;
     private List<String> hashtags;
     private String name;
-    private String photo_url;
+    private String photoUrl;
 
 
     public Post toEntity(){

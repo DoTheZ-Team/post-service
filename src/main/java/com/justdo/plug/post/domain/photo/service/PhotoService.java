@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service;
 public class PhotoService {
     private final PhotoRepository photoRepository;
 
-    public void createPhoto(String photo_url, Long post_id){
+    public void createPhoto(String photoUrl, Long postId){
         Photo photo = new Photo();
-        photo.setPost_id(post_id);
-        photo.setPhoto_url(photo_url);
+        photo.setPostId(postId);
+        photo.setPhotoUrl(photoUrl);
         save(photo);
     }
 
