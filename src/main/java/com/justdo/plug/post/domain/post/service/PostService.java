@@ -51,4 +51,14 @@ public class PostService {
         return posts;
     }
 
+    // BLOG007: 해시태그 값 추출
+    public List<Post> getHashtags(Long memberId){
+        List<Post> memberPosts = postRepository.findByMemberId(memberId);
+        if(memberPosts.isEmpty()) {
+            throw new ApiException(ErrorStatus._NO_HASHTAGS);
+        }
+
+        return memberPosts;
+    }
+
 }

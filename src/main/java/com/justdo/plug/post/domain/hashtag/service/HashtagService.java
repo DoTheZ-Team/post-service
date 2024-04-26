@@ -17,9 +17,18 @@ public class HashtagService {
     private final HashtagRepository hashtagRepository;
 
     public Long getHashtagIdByName(String hashtagName) {
-        Hashtag hashtag = Optional.ofNullable(hashtagRepository.findByName(hashtagName))
-                .orElseThrow(() -> new ApiException(ErrorStatus._HASHTAG_NOT_FOUND));
-
+        Hashtag hashtag = hashtagRepository.findByName(hashtagName);
+        if (hashtag == null) {
+            // 만약 해당하는 이름의 해시태그가 없는 경우 새로운 해시태그를 생성
+            hashtag = createNewHashtag(hashtagName);
+        }
         return hashtag.getId();
+    }
+
+    private Hashtag createNewHashtag(String hashtagName) {
+        Hashtag newHashtag = new Hashtag();
+        newHashtag.setName(hashtagName);
+
+        return hashtagRepository.save(newHashtag);
     }
 }
