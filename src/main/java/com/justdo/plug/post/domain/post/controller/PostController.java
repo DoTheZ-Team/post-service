@@ -92,7 +92,7 @@ public class PostController {
 
     // BlOG007: 특정 멤버가 사용한 HASHTAG 값 조회
     @GetMapping("member/{memberId}")
-    public List<Post> ViewHashtags(@PathVariable Long memberId){
+    public List<String> ViewHashtags(@PathVariable Long memberId){
 
         return postService.getHashtags(memberId);
 

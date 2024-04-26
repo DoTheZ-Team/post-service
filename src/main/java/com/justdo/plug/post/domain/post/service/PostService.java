@@ -1,9 +1,12 @@
 package com.justdo.plug.post.domain.post.service;
 
+import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
+import com.justdo.plug.post.domain.posthashtag.PostHashtag;
+import com.justdo.plug.post.domain.posthashtag.repository.PostHashtagRepository;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import jakarta.transaction.Transactional;
@@ -11,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -19,6 +23,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
+    private final PostHashtagRepository postHashtagRepository;
+    private final HashtagService hashtagService;
+
 
     // BLOG001: 게시글 리스트 조회
     public List<Post> getAllPosts() {
@@ -52,13 +59,36 @@ public class PostService {
     }
 
     // BLOG007: 해시태그 값 추출
-    public List<Post> getHashtags(Long memberId){
+    public List<String> getHashtags(Long memberId) {
+        // 멤버 아이디에 해당하는 포스트를 가져온다.
         List<Post> memberPosts = postRepository.findByMemberId(memberId);
-        if(memberPosts.isEmpty()) {
+
+        // 멤버 아이디에 해당하는 포스트가 없는 경우
+        if (memberPosts.isEmpty()) {
             throw new ApiException(ErrorStatus._NO_HASHTAGS);
         }
 
-        return memberPosts;
+        // 멤버 아이디에 해당하는 포스트의 아이디만 추출하여 반환
+        List<Long> postIds = memberPosts.stream()
+                .map(Post::getId)
+                .toList();
+
+        List<String> hashtagNames = new ArrayList<>();
+
+        // 각 포스트별로 해당하는 해시태그 아이디를 추출하여 저장
+        for (Long postId : postIds) {
+            List<PostHashtag> postHashtags;
+            postHashtags = postHashtagRepository.findByPostId(postId);
+            for (PostHashtag postHashtag : postHashtags) {
+                // 아이디에서 해시태그 명으로 변경 후 리스트에 저장
+                String hashtagName = hashtagService.getHashtagNameById(postHashtag.getHashtagId());
+                hashtagNames.add(hashtagName);
+            }
+        }
+
+
+        return hashtagNames;
     }
+
 
 }

@@ -31,4 +31,10 @@ public class HashtagService {
 
         return hashtagRepository.save(newHashtag);
     }
+
+    public String getHashtagNameById(Long hashtagId) {
+        Hashtag hashtag = hashtagRepository.findById(hashtagId)
+                .orElseThrow(() -> new ApiException(ErrorStatus._HASHTAG_NOT_FOUND));
+        return hashtag.getName();
+    }
 }
