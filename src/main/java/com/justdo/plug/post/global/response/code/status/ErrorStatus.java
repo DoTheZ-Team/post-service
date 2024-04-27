@@ -22,6 +22,9 @@ public enum ErrorStatus implements BaseErrorCode {
     //블로그
     _BLOG_NOT_FOUND(HttpStatus.NOT_FOUND, "BLOG404", "해당 블로그를 찾을 수 없습니다."),
 
+    //해시태그
+    _NO_HASHTAGS(HttpStatus.NOT_FOUND, "HASHTAGS404", "해당 사용자가 사용한 해시태그를 찾을 수 없습니다."),
+
     // 해시태그
     _HASHTAG_NOT_FOUND(HttpStatus.NOT_FOUND, "HASHTAG404", "해당 해시태그를 찾을 수 없습니다.");
 
