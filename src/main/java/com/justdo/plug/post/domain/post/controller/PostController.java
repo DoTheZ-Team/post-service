@@ -1,5 +1,6 @@
 package com.justdo.plug.post.domain.post.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.justdo.plug.post.domain.category.service.CategoryService;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
@@ -95,6 +96,14 @@ public class PostController {
     public List<String> ViewHashtags(@PathVariable Long memberId){
 
         return postService.getHashtags(memberId);
+
+    }
+
+    // BlOG008: 게시글의 글만 조회하기
+    @GetMapping("preview/{postId}")
+    public String PreviewPost(@PathVariable Long postId) throws JsonProcessingException {
+
+        return postService.getPreviewPost(postId);
 
     }
 

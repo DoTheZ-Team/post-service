@@ -1,5 +1,6 @@
 package com.justdo.plug.post.domain.post.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
@@ -14,8 +15,11 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -88,6 +92,32 @@ public class PostService {
 
 
         return hashtagNames;
+    }
+
+    // BlOG008: 게시글의 글만 조회하기
+    public String getPreviewPost(Long postId) throws JsonProcessingException {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
+
+        String preview = post.getContent();
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonArray = mapper.readTree(preview);
+
+        StringBuilder extractedTexts = new StringBuilder();
+        for (JsonNode node : jsonArray) {
+            JsonNode contentArray = node.path("content");
+            if (contentArray.isArray()) {
+                for (JsonNode contentObj : contentArray) {
+                    if (contentObj.isObject()) {
+                        String text = contentObj.path("text").asText();
+                        extractedTexts.append(text).append(" ");
+                    }
+                }
+            }
+        }
+
+        return extractedTexts.toString().trim();
     }
 
 
