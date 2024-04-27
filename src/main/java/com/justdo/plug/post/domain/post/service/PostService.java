@@ -7,7 +7,7 @@ import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
-import com.justdo.plug.post.domain.posthashtag.repository.PostHashtagRepository;
+import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import jakarta.transaction.Transactional;
@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -27,8 +26,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-    private final PostHashtagRepository postHashtagRepository;
     private final HashtagService hashtagService;
+    private final PostHashtagService postHashtagService;
 
 
     // BLOG001: 게시글 리스트 조회
@@ -82,7 +81,8 @@ public class PostService {
         // 각 포스트별로 해당하는 해시태그 아이디를 추출하여 저장
         for (Long postId : postIds) {
             List<PostHashtag> postHashtags;
-            postHashtags = postHashtagRepository.findByPostId(postId);
+            postHashtags = postHashtagService.getPostHashtags(postId);
+
             for (PostHashtag postHashtag : postHashtags) {
                 // 아이디에서 해시태그 명으로 변경 후 리스트에 저장
                 String hashtagName = hashtagService.getHashtagNameById(postHashtag.getHashtagId());
