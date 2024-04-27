@@ -21,9 +21,10 @@ public class HashtagService {
         return hashtag.getId();
     }
 
-    private Hashtag createNewHashtag(String hashtagName) {
-        Hashtag newHashtag = new Hashtag();
-        newHashtag.setName(hashtagName);
+    public Hashtag createNewHashtag(String hashtagName) {
+        Hashtag newHashtag = Hashtag.builder()
+                .name(hashtagName)
+                .build();
 
         return hashtagRepository.save(newHashtag);
     }

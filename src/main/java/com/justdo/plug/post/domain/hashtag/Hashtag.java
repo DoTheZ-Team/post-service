@@ -4,10 +4,11 @@ import com.justdo.plug.post.domain.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Builder
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Hashtag extends BaseTimeEntity {
     @Id
