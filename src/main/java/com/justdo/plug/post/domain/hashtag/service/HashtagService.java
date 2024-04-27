@@ -8,8 +8,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -18,10 +16,8 @@ public class HashtagService {
 
     public Long getHashtagIdByName(String hashtagName) {
         Hashtag hashtag = hashtagRepository.findByName(hashtagName);
-        if (hashtag == null) {
-            // 만약 해당하는 이름의 해시태그가 없는 경우 새로운 해시태그를 생성
-            hashtag = createNewHashtag(hashtagName);
-        }
+        // 만약 사용하려는 해시태그가 없다면 새로운 해시태그 생성 후 사용
+        hashtag = (hashtag == null) ? createNewHashtag(hashtagName) : hashtag;
         return hashtag.getId();
     }
 
