@@ -1,24 +1,28 @@
 package com.justdo.plug.post.domain.post.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
+import com.justdo.plug.post.domain.post.dto.PreviewResponse;
+import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemList;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.json.JSONException;
-import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.json.JSONException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 
 @Service
@@ -142,5 +146,19 @@ public class PostService {
         return extractedTexts.toString().trim();
     }
 
+    public PostItemList findPreviewList(List<Long> blogIdList, int page) {
 
+        PageRequest pageRequest = PageRequest.of(page, 10, Sort.by("createdAt"));
+        Slice<Post> posts = postRepository.findByBlogIdList(blogIdList, pageRequest);
+
+        return PreviewResponse.toPostItemList(posts);
+    }
+
+    public PostItemList findPreviewsByMember(List<Long> memberIdList, int page) {
+
+        PageRequest pageRequest = PageRequest.of(page, 10, Sort.by("createdAt"));
+        Slice<Post> posts = postRepository.findByMemberIdList(memberIdList, pageRequest);
+
+        return PreviewResponse.toPostItemList(posts);
+    }
 }

@@ -7,8 +7,10 @@ import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
+import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemList;
 import com.justdo.plug.post.domain.post.service.PostService;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.web.bind.annotation.*;
@@ -111,6 +113,21 @@ public class PostController {
 
         return postService.getPreviewPost(postId);
 
+    }
+
+    // GLUE252 : 블로그의 포스트 preview 반환
+    @PostMapping("preview")
+    public PostItemList findPreviewByBlogIds(@RequestBody List<Long> blogIdList,
+        @RequestParam int page) {
+
+        return postService.findPreviewList(blogIdList, page);
+    }
+
+    @PostMapping("preview/subscribers")
+    public PostItemList findPreviewByMemberIds(@RequestBody List<Long> memberIdList,
+        @RequestParam int page) {
+
+        return postService.findPreviewsByMember(memberIdList, page);
     }
 
 }
