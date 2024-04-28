@@ -98,7 +98,7 @@ public class PostController {
     }
 
     // BlOG007: 특정 멤버가 사용한 HASHTAG 값 조회
-    @GetMapping("member/{memberId}")
+    @GetMapping("memberId/{memberId}")
     public List<String> ViewHashtags(@PathVariable Long memberId){
 
         return postService.getHashtags(memberId);
@@ -111,6 +111,12 @@ public class PostController {
 
         return postService.getPreviewPost(postId);
 
+    }
+
+    // BLOG009: 블로그 아이디로 해시태그 추출하기
+    @GetMapping("blogId/{blogId}")
+    public List<String> ViewHashtagsBlog(@PathVariable Long blogId){
+        return postService.getHashtagsBlog(blogId);
     }
 
 }

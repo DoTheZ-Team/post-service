@@ -120,7 +120,7 @@ public class PostService {
         return extractedTexts.toString().trim();
     }
 
-    // BlOG009: 게시글의 preview 값 저장
+    // 게시글의 preview 값 저장
     public String savePreviewPost(String content) throws JsonProcessingException {
 
         ObjectMapper mapper = new ObjectMapper();
@@ -142,5 +142,38 @@ public class PostService {
         return extractedTexts.toString().trim();
     }
 
+    // BLOG009: 블로그 아이디로 해시태그 추출하기
+    public List<String> getHashtagsBlog(Long blogId){
+
+        // 블로그 아이디에 해당하는 포스트를 가져온다.
+        List<Post> blogPosts = postRepository.findByBlogId(blogId);
+
+        // 블로그 아이디에 해당하는 포스트가 없는 경우
+        if (blogPosts.isEmpty()) {
+            throw new ApiException(ErrorStatus._NO_HASHTAGS);
+        }
+
+        // 블로그 아이디에 해당하는 포스트의 아이디만 추출하여 반환
+        List<Long> postIds = blogPosts.stream()
+                .map(Post::getId)
+                .toList();
+
+        List<String> hashtagNames = new ArrayList<>();
+
+        // 각 포스트별로 해당하는 해시태그 아이디를 추출하여 저장
+        for (Long postId : postIds) {
+            List<PostHashtag> postHashtags;
+            postHashtags = postHashtagService.getPostHashtags(postId);
+
+            for (PostHashtag postHashtag : postHashtags) {
+                // 아이디에서 해시태그 명으로 변경 후 리스트에 저장
+                String hashtagName = hashtagService.getHashtagNameById(postHashtag.getHashtagId());
+                hashtagNames.add(hashtagName);
+            }
+        }
+
+
+        return hashtagNames;
+    }
 
 }
