@@ -34,4 +34,6 @@ public class HashtagService {
                 .orElseThrow(() -> new ApiException(ErrorStatus._HASHTAG_NOT_FOUND));
         return hashtag.getName();
     }
+
+
 }
