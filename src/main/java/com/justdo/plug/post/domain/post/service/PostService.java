@@ -1,12 +1,13 @@
 package com.justdo.plug.post.domain.post.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
-import com.justdo.plug.post.domain.posthashtag.repository.PostHashtagRepository;
+import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import jakarta.transaction.Transactional;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,8 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-    private final PostHashtagRepository postHashtagRepository;
     private final HashtagService hashtagService;
+    private final PostHashtagService postHashtagService;
 
 
     // BLOG001: 게시글 리스트 조회
@@ -78,7 +81,8 @@ public class PostService {
         // 각 포스트별로 해당하는 해시태그 아이디를 추출하여 저장
         for (Long postId : postIds) {
             List<PostHashtag> postHashtags;
-            postHashtags = postHashtagRepository.findByPostId(postId);
+            postHashtags = postHashtagService.getPostHashtags(postId);
+
             for (PostHashtag postHashtag : postHashtags) {
                 // 아이디에서 해시태그 명으로 변경 후 리스트에 저장
                 String hashtagName = hashtagService.getHashtagNameById(postHashtag.getHashtagId());
@@ -88,6 +92,54 @@ public class PostService {
 
 
         return hashtagNames;
+    }
+
+    // BlOG008: 게시글의 글만 조회하기
+    public String getPreviewPost(Long postId) throws JsonProcessingException {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
+
+        String preview = post.getContent();
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonArray = mapper.readTree(preview);
+
+        StringBuilder extractedTexts = new StringBuilder();
+        for (JsonNode node : jsonArray) {
+            JsonNode contentArray = node.path("content");
+            if (contentArray.isArray()) {
+                for (JsonNode contentObj : contentArray) {
+                    if (contentObj.isObject()) {
+                        String text = contentObj.path("text").asText();
+                        extractedTexts.append(text).append(" ");
+                    }
+                }
+            }
+        }
+
+        return extractedTexts.toString().trim();
+    }
+
+    // BlOG009: 게시글의 preview 값 저장
+    public String savePreviewPost(String content) throws JsonProcessingException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonArray = mapper.readTree(content);
+
+        StringBuilder extractedTexts = new StringBuilder();
+        for (JsonNode node : jsonArray) {
+            JsonNode contentArray = node.path("content");
+            if (contentArray.isArray()) {
+                for (JsonNode contentObj : contentArray) {
+                    if (contentObj.isObject()) {
+                        String text = contentObj.path("text").asText();
+                        extractedTexts.append(text).append(" ");
+                    }
+                }
+            }
+        }
+
+        return extractedTexts.toString().trim();
     }
 
 

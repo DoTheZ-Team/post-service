@@ -18,7 +18,7 @@ public class PostRequestDto {
     private List<String> hashtags;
     private String name;
     private String photoUrl;
-
+    private String preview;
 
     public Post toEntity(){
         return Post.builder()
@@ -28,6 +28,7 @@ public class PostRequestDto {
                 .state(state)
                 .memberId(memberId)
                 .blogId(blogId)
+                .preview(preview)
                 .build();
     }
 }

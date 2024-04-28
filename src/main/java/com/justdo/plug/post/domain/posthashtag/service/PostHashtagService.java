@@ -32,6 +32,13 @@ public class PostHashtagService {
         }
 
     }
+
+    public List<PostHashtag> getPostHashtags(Long postId){
+
+        return postHashtagRepository.findByPostId(postId);
+
+    }
+
     public void save(PostHashtag postHashtag) {
         postHashtagRepository.save(postHashtag);
     }
