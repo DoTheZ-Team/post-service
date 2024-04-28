@@ -39,4 +39,7 @@ public class Post extends BaseTimeEntity {
     @Column(nullable = false, updatable = false)
     private Long memberId;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String preview;
+
 }

@@ -46,10 +46,14 @@ public class PostController {
 
     // BLOG003: 게시글 작성 요청
     @PostMapping("{blogId}")
-    public String PostBlog(@RequestBody PostRequestDto RequestDto, @PathVariable Long blogId) {
+    public String PostBlog(@RequestBody PostRequestDto RequestDto, @PathVariable Long blogId) throws JsonProcessingException {
 
             // 1. Post 저장
             RequestDto.setBlogId(blogId);
+            // 1-2. Preview 저장
+            String content = RequestDto.getContent();
+            String preview = postService.savePreviewPost(content);
+            RequestDto.setPreview(preview);
             Post post = postService.save(RequestDto);
 
             // Post 에서 post_id 받아오기
@@ -66,6 +70,8 @@ public class PostController {
             // 4. Photo 저장
             String photoUrl = RequestDto.getPhotoUrl();
             photoService.createPhoto(photoUrl, postId);
+
+
 
             return "게시글이 성공적으로 업로드 되었습니다";
     }

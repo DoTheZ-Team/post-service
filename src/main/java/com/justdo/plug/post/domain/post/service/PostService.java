@@ -120,5 +120,27 @@ public class PostService {
         return extractedTexts.toString().trim();
     }
 
+    // BlOG009: 게시글의 preview 값 저장
+    public String savePreviewPost(String content) throws JsonProcessingException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonArray = mapper.readTree(content);
+
+        StringBuilder extractedTexts = new StringBuilder();
+        for (JsonNode node : jsonArray) {
+            JsonNode contentArray = node.path("content");
+            if (contentArray.isArray()) {
+                for (JsonNode contentObj : contentArray) {
+                    if (contentObj.isObject()) {
+                        String text = contentObj.path("text").asText();
+                        extractedTexts.append(text).append(" ");
+                    }
+                }
+            }
+        }
+
+        return extractedTexts.toString().trim();
+    }
+
 
 }
