@@ -101,7 +101,7 @@ public class PostController {
     @GetMapping("memberId/{memberId}")
     public List<String> ViewHashtags(@PathVariable Long memberId){
 
-        return postService.getHashtags(memberId);
+        return postHashtagService.getHashtags(memberId);
 
     }
 
@@ -116,7 +116,7 @@ public class PostController {
     // BLOG009: 블로그 아이디로 해시태그 추출하기
     @GetMapping("blogId/{blogId}")
     public List<String> ViewHashtagsBlog(@PathVariable Long blogId){
-        return postService.getHashtagsBlog(blogId);
+        return postHashtagService.getHashtagsBlog(blogId);
     }
 
 }
