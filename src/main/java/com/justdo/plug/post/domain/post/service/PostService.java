@@ -10,8 +10,6 @@ import com.justdo.plug.post.domain.post.dto.PostResponseDto;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemList;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
-import com.justdo.plug.post.domain.posthashtag.PostHashtag;
-import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import jakarta.transaction.Transactional;
@@ -24,6 +22,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 @Transactional
@@ -31,8 +31,7 @@ import org.springframework.stereotype.Service;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final HashtagService hashtagService;
-    private final PostHashtagService postHashtagService;
+
 
 
     // BLOG001: 게시글 리스트 조회
@@ -124,7 +123,7 @@ public class PostService {
         return extractedTexts.toString().trim();
     }
 
-    // BlOG009: 게시글의 preview 값 저장
+    // 게시글의 preview 값 저장
     public String savePreviewPost(String content) throws JsonProcessingException {
 
         ObjectMapper mapper = new ObjectMapper();
@@ -161,4 +160,5 @@ public class PostService {
 
         return PreviewResponse.toPostItemList(posts);
     }
+
 }
