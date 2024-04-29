@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 @Transactional
 @RequiredArgsConstructor
 public class PostService {
+
     private final PostRepository postRepository;
     private final HashtagService hashtagService;
     private final PostHashtagService postHashtagService;
@@ -44,22 +45,22 @@ public class PostService {
     // BLOG002: 게시글 상세 페이지 조회
     public PostResponseDto getPostById(Long postId) throws JSONException {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
+            .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
         return PostResponseDto.createFromPost(post);
     }
 
     // BLOG003: 블로그 작성
     public Post save(PostRequestDto requestDto) {
-       
-            Post post = requestDto.toEntity();
-            return postRepository.save(post);
+
+        Post post = requestDto.toEntity();
+        return postRepository.save(post);
     }
 
     // BLOG006: 블로그 게시글 리스트 조회
-    public List<Post> getBlogPosts(Long blogId){
+    public List<Post> getBlogPosts(Long blogId) {
         List<Post> posts = postRepository.findByBlogId(blogId);
-        if(posts.isEmpty()) {
+        if (posts.isEmpty()) {
             throw new ApiException(ErrorStatus._BLOG_NOT_FOUND);
         }
         return posts;
@@ -77,8 +78,8 @@ public class PostService {
 
         // 멤버 아이디에 해당하는 포스트의 아이디만 추출하여 반환
         List<Long> postIds = memberPosts.stream()
-                .map(Post::getId)
-                .toList();
+            .map(Post::getId)
+            .toList();
 
         List<String> hashtagNames = new ArrayList<>();
 
@@ -94,14 +95,13 @@ public class PostService {
             }
         }
 
-
         return hashtagNames;
     }
 
     // BlOG008: 게시글의 글만 조회하기
     public String getPreviewPost(Long postId) throws JsonProcessingException {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
+            .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
         String preview = post.getContent();
 
