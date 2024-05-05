@@ -36,6 +36,7 @@ public class PostController {
     private final CategoryService categoryService;
     private final PhotoService photoService;
 
+
     // BLOG001: 게시글 리스트 조회 요청
     @GetMapping()
     public List<Post> ViewList() {

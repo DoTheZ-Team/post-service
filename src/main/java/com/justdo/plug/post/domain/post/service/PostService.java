@@ -10,6 +10,8 @@ import com.justdo.plug.post.domain.post.dto.PostResponseDto;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemList;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
+import com.justdo.plug.post.domain.posthashtag.PostHashtag;
+import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import jakarta.transaction.Transactional;
@@ -31,13 +33,15 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
-
+    private final PostHashtagService postHashtagService;
+    private final HashtagService hashtagService;
 
 
     // BLOG001: 게시글 리스트 조회
     public List<Post> getAllPosts() {
 
-        return postRepository.findAll();
+        //return postRepository.findAll();
+        return null;
 
     }
 
