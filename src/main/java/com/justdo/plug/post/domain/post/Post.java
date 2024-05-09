@@ -1,15 +1,19 @@
 package com.justdo.plug.post.domain.post;
 
 import com.justdo.plug.post.domain.common.BaseTimeEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import lombok.*;
 
-
+@EqualsAndHashCode(callSuper = true)
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Data
 public class Post extends BaseTimeEntity {
 
 
@@ -41,5 +45,8 @@ public class Post extends BaseTimeEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String preview;
+
+    @Column
+    private String esId;
 
 }

@@ -10,20 +10,26 @@ import com.justdo.plug.post.domain.post.dto.PostResponseDto;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemList;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
+import com.justdo.plug.post.domain.posthashtag.PostHashtag;
+import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import jakarta.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
-
 
 @Service
 @Transactional
@@ -31,13 +37,14 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
-
-
+    private final PostHashtagService postHashtagService;
+    private final HashtagService hashtagService;
 
     // BLOG001: 게시글 리스트 조회
     public List<Post> getAllPosts() {
 
-        return postRepository.findAll();
+        //return postRepository.findAll();
+        return null;
 
     }
 
@@ -50,9 +57,62 @@ public class PostService {
     }
 
     // BLOG003: 블로그 작성
-    public Post save(PostRequestDto requestDto) {
-
+    public Post save(PostRequestDto requestDto) throws JsonProcessingException {
         Post post = requestDto.toEntity();
+
+        String url = "https://e69e033e6b5f461db0d97431ac9ce409.es.us-east-1.aws.elastic.cloud:443/post/_doc";
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonString = objectMapper.writeValueAsString(requestDto.getContent());
+        jsonString = jsonString.substring(1, jsonString.length() - 1);
+        System.out.println(jsonString);
+        List<String> hashtags = requestDto.getHashtags();
+        StringBuilder hashtagsJson = new StringBuilder("[");
+
+        for (int i = 0; i < hashtags.size(); i++) {
+            String hashtag = "\"" + hashtags.get(i) + "\"";
+            hashtagsJson.append(hashtag);
+            if (i < hashtags.size() - 1) {
+                hashtagsJson.append(",");
+            }
+        }
+        hashtagsJson.append("]");
+
+        String jsonBody = "{\n" +
+                "    \"title\": \"" + requestDto.getTitle() + "\",\n" +
+                "    \"content\": \"" + jsonString + "\",\n" +
+                "    \"memberId\": " + requestDto.getMemberId() + ",\n" +
+                "    \"hashtags\": " + hashtagsJson + ",\n" +
+                "    \"name\": \"" + requestDto.getName() + "\",\n" +
+                "    \"photo_url\": \"" + requestDto.getPhotoUrl() + "\"\n" +
+                "}";
+
+
+        System.out.println(jsonBody);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .setHeader("Authorization", "ApiKey alI1LVVJOEI3eGJfdmZvUkMxQWQ6MHp2MHJXQ0VSMk85bXdNVGlrLWgxZw==")
+                .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .build();
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            String ResponseBody = response.body();
+            System.out.println(ResponseBody);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(ResponseBody);
+
+
+            String id = jsonNode.get("_id").asText();
+            post.setEsId(id);
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(post.getEsId());
         return postRepository.save(post);
     }
 
