@@ -56,4 +56,22 @@ public class PreviewResponse {
             .build();
 
     }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class BlogPostItem {
+
+        private List<PostItem> postItems;
+        private List<String> hashtagNames;
+    }
+
+    public static BlogPostItem toBlogPostItem(List<PostItem> postItems, List<String> hashtagNames) {
+
+        return BlogPostItem.builder()
+            .postItems(postItems)
+            .hashtagNames(hashtagNames)
+            .build();
+    }
 }
