@@ -7,6 +7,7 @@ import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
+import com.justdo.plug.post.domain.post.dto.PostSearchDTO;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemList;
 import com.justdo.plug.post.domain.post.service.PostService;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
@@ -142,5 +143,17 @@ public class PostController {
         return postHashtagService.getHashtagsBlog(blogId);
 
     }
+
+    @GetMapping("/search")
+    public List<PostSearchDTO> searchElastic(@RequestParam String q) {
+
+        return postService.searchPost(q);
+    }
+
+    @PostMapping("/test")
+    public void saveDoc() {
+        postService.savePostIndex();
+    }
+
 
 }

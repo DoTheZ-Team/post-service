@@ -7,22 +7,17 @@ import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
+import com.justdo.plug.post.domain.post.dto.PostSearchDTO;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemList;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
+import com.justdo.plug.post.elastic.PostDocument;
+import com.justdo.plug.post.elastic.PostElasticsearchRepository;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.json.JSONException;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -30,6 +25,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.json.JSONException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
@@ -39,6 +42,13 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostHashtagService postHashtagService;
     private final HashtagService hashtagService;
+    private final PostElasticsearchRepository postElasticsearchRepository;
+
+    @Value("${spring.elasticsearch.uris}")
+    private String url;
+
+    @Value("${elasticsearch.api-key}")
+    private String apiKey;
 
     // BLOG001: 게시글 리스트 조회
     public List<Post> getAllPosts() {
@@ -78,32 +88,32 @@ public class PostService {
         hashtagsJson.append("]");
 
         String jsonBody = "{\n" +
-                "    \"title\": \"" + requestDto.getTitle() + "\",\n" +
-                "    \"content\": \"" + jsonString + "\",\n" +
-                "    \"memberId\": " + requestDto.getMemberId() + ",\n" +
-                "    \"hashtags\": " + hashtagsJson + ",\n" +
-                "    \"name\": \"" + requestDto.getName() + "\",\n" +
-                "    \"photo_url\": \"" + requestDto.getPhotoUrl() + "\"\n" +
-                "}";
-
+            "    \"title\": \"" + requestDto.getTitle() + "\",\n" +
+            "    \"content\": \"" + jsonString + "\",\n" +
+            "    \"memberId\": " + requestDto.getMemberId() + ",\n" +
+            "    \"hashtags\": " + hashtagsJson + ",\n" +
+            "    \"name\": \"" + requestDto.getName() + "\",\n" +
+            "    \"photo_url\": \"" + requestDto.getPhotoUrl() + "\"\n" +
+            "}";
 
         System.out.println(jsonBody);
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                .setHeader("Authorization", "ApiKey alI1LVVJOEI3eGJfdmZvUkMxQWQ6MHp2MHJXQ0VSMk85bXdNVGlrLWgxZw==")
-                .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .build();
+            .uri(URI.create(url))
+            .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+            .setHeader("Authorization",
+                "ApiKey alI1LVVJOEI3eGJfdmZvUkMxQWQ6MHp2MHJXQ0VSMk85bXdNVGlrLWgxZw==")
+            .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .build();
 
         try {
             HttpClient client = HttpClient.newHttpClient();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = client.send(request,
+                HttpResponse.BodyHandlers.ofString());
 
             String ResponseBody = response.body();
             System.out.println(ResponseBody);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(ResponseBody);
-
 
             String id = jsonNode.get("_id").asText();
             post.setEsId(id);
@@ -220,5 +230,63 @@ public class PostService {
 
         return PreviewResponse.toPostItemList(posts);
     }
+
+    /**
+     * ElasticSearch를 통한 Post 검색
+     */
+    public List<PostSearchDTO> searchPost(String q) {
+
+        // Elasticsearch URL
+        String searchUrl = url + "/post/_search?q=" + q;
+
+        // Request Header
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(searchUrl))
+            .setHeader("Authorization", "ApiKey " + apiKey)
+            .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .build();
+
+        // Search Result
+        List<PostSearchDTO> postSearchDTOList = new ArrayList<>();
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(request,
+                HttpResponse.BodyHandlers.ofString());
+            String responseBody = response.body();
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(responseBody);
+
+            // search 결과 리스트 반환
+            JsonNode hitsNode = jsonNode.path("hits").path("hits");
+
+            for (JsonNode hit : hitsNode) {
+                JsonNode sourceNode = hit.path("_source");
+
+                // PostSearchDTO로 매핑
+                PostSearchDTO postSearchDTO = objectMapper.treeToValue(sourceNode,
+                    PostSearchDTO.class);
+                postSearchDTOList.add(postSearchDTO);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return postSearchDTOList;
+    }
+
+    public void savePostIndex() {
+
+        Post post = Post.builder()
+            .title("test")
+            .preview("preview")
+            .blogId(1L)
+            .memberId(2L)
+            .build();
+
+        PostDocument postDocument = PostDocument.toDocument(post);
+        postElasticsearchRepository.save(postDocument);
+    }
+
 
 }

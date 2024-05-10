@@ -1,5 +1,6 @@
 package com.justdo.plug.post.elastic;
 
+import com.justdo.plug.post.domain.post.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,7 +21,7 @@ public class PostDocument {
     private String id;
 
     @Field(type = FieldType.Long, index = false, docValues = false)
-    private String postId;
+    private Long postId;
 
     @Field(type = FieldType.Text, analyzer = "nori")
     private String title;
@@ -34,4 +35,14 @@ public class PostDocument {
     @Field(type = FieldType.Long, index = false, docValues = false)
     private Long blogId;
 
+    public static PostDocument toDocument(Post post) {
+
+        return PostDocument.builder()
+//            .postId(post.getId())
+            .title(post.getTitle())
+            .preview(post.getPreview())
+            .memberId(post.getMemberId())
+            .blogId(post.getBlogId())
+            .build();
+    }
 }
