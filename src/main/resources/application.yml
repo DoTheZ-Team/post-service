@@ -1,8 +1,34 @@
+server:
+  port: 8082
+
 spring:
   application:
-    name: post
+    name: post-service
   profiles:
     active: prod
-  config:
-    import: optional:configserver:http://localhost:8888
-    # import: optional:configserver:http://glue-config.glue-service.svc.cluster.local:8888
+
+  # mysql
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://34.23.9.30:3306/glue
+    username: root
+    password: jeong2160
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        show_sql: true
+
+  # elastic
+  elasticsearch:
+    username: gcu-002
+    password: glue2024!
+    uris: https://8063c2e7a91f4814b6c492ee9cc9283c.us-west-2.aws.found.io:443
+
+# elastic search
+elasticsearch:
+  api-key: ZjBBUFlJOEJibng1TUN3SnMyMlQ6MGdGeEw2LVdRaWlsNTViSDhzQ3cxUQ==

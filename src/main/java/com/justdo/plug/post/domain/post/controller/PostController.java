@@ -145,21 +145,11 @@ public class PostController {
     }
     
     // kylo es 
-    @GetMapping("/search")
-    public List<PostSearchDTO> searchElastic(@RequestParam String q) {
+    @GetMapping("search")
+    public List<PostSearchDTO> searchElastic(@RequestParam String keyword) {
 
-        return postService.searchPost(q);
+        return postService.searchPost(keyword);
     }
 
-    @PostMapping("/test")
-    public void saveDoc() {
-        postService.savePostIndex();
-    }
-
-    // GLUE269: Post에 대한 검색엔진
-    @GetMapping("search/{keyword}")
-    public List<String> showSearchResult(@PathVariable String keyword){
-        return postService.SearchEngine(keyword);
-    }
 
 }

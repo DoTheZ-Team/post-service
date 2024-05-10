@@ -38,7 +38,7 @@ public class PostDocument {
     public static PostDocument toDocument(Post post) {
 
         return PostDocument.builder()
-//            .postId(post.getId())
+            .postId(post.getId())
             .title(post.getTitle())
             .preview(post.getPreview())
             .memberId(post.getMemberId())

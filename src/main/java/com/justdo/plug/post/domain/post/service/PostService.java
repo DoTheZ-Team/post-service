@@ -27,6 +27,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,60 +74,11 @@ public class PostService {
     public Post save(PostRequestDto requestDto) throws JsonProcessingException {
         Post post = requestDto.toEntity();
 
-        String url = "https://e69e033e6b5f461db0d97431ac9ce409.es.us-east-1.aws.elastic.cloud:443/post/_doc";
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonString = objectMapper.writeValueAsString(requestDto.getContent());
-        jsonString = jsonString.substring(1, jsonString.length() - 1);
-        System.out.println(jsonString);
-        List<String> hashtags = requestDto.getHashtags();
-        StringBuilder hashtagsJson = new StringBuilder("[");
-
-        for (int i = 0; i < hashtags.size(); i++) {
-            String hashtag = "\"" + hashtags.get(i) + "\"";
-            hashtagsJson.append(hashtag);
-            if (i < hashtags.size() - 1) {
-                hashtagsJson.append(",");
-            }
-        }
-        hashtagsJson.append("]");
-
-        String jsonBody = "{\n" +
-            "    \"title\": \"" + requestDto.getTitle() + "\",\n" +
-            "    \"content\": \"" + jsonString + "\",\n" +
-            "    \"memberId\": " + requestDto.getMemberId() + ",\n" +
-            "    \"hashtags\": " + hashtagsJson + ",\n" +
-            "    \"name\": \"" + requestDto.getName() + "\",\n" +
-            "    \"photo_url\": \"" + requestDto.getPhotoUrl() + "\"\n" +
-            "}";
-
-        System.out.println(jsonBody);
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-            .setHeader("Authorization",
-                "ApiKey alI1LVVJOEI3eGJfdmZvUkMxQWQ6MHp2MHJXQ0VSMk85bXdNVGlrLWgxZw==")
-            .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .build();
-
-        try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpResponse<String> response = client.send(request,
-                HttpResponse.BodyHandlers.ofString());
-
-            String ResponseBody = response.body();
-            System.out.println(ResponseBody);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readTree(ResponseBody);
-
-            String id = jsonNode.get("_id").asText();
-            post.setEsId(id);
-
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        Post save = postRepository.save(post);
+        savePostIndex(post);
 
         System.out.println(post.getEsId());
-        return postRepository.save(post);
+        return save;
     }
 
     // BLOG006: 블로그 게시글 리스트 조회
@@ -233,13 +186,10 @@ public class PostService {
         return PreviewResponse.toPostItemList(posts);
     }
 
-    /**
-     * ElasticSearch를 통한 Post 검색
-     */
-    public List<PostSearchDTO> searchPost(String q) {
+    public List<PostSearchDTO> searchPost(String keyword) {
 
         // Elasticsearch URL
-        String searchUrl = url + "/post/_search?q=" + q;
+        String searchUrl = url + "/post/_search?q=" + URLEncoder.encode(keyword, StandardCharsets.UTF_8);
 
         // Request Header
         HttpRequest request = HttpRequest.newBuilder()
@@ -250,12 +200,15 @@ public class PostService {
 
         // Search Result
         List<PostSearchDTO> postSearchDTOList = new ArrayList<>();
+        List<Long> postSearchDTOListPostId = new ArrayList<>();
+        List<Long> postSearchDTOListBlogId = new ArrayList<>();
 
         try {
             HttpClient client = HttpClient.newHttpClient();
             HttpResponse<String> response = client.send(request,
                 HttpResponse.BodyHandlers.ofString());
             String responseBody = response.body();
+            System.out.println(responseBody);
 
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(responseBody);
@@ -270,65 +223,27 @@ public class PostService {
                 PostSearchDTO postSearchDTO = objectMapper.treeToValue(sourceNode,
                     PostSearchDTO.class);
                 postSearchDTOList.add(postSearchDTO);
+                postSearchDTOListPostId.add(postSearchDTO.getPostId());
+                postSearchDTOListBlogId.add(postSearchDTO.getBlogId());
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+        List<Long> newPostSearchDTOListBlogId = postSearchDTOListBlogId.stream().distinct().collect(Collectors.toList());
+        List<Long> newPostSearchDTOListPostId = postSearchDTOListPostId.stream().distinct().collect(Collectors.toList());
+
+        System.out.println("postSearchDTOListBlogId = " + newPostSearchDTOListBlogId);
+        System.out.println("postSearchDTOListPostId = " + newPostSearchDTOListPostId);
+
+
+
         return postSearchDTOList;
     }
 
-    public void savePostIndex() {
-
-        Post post = Post.builder()
-            .title("test")
-            .preview("preview")
-            .blogId(1L)
-            .memberId(2L)
-            .build();
-
+    public void savePostIndex(Post post) {
         PostDocument postDocument = PostDocument.toDocument(post);
-        postElasticsearchRepository.save(postDocument);
-    }
-
-
-
-    public List<String> SearchEngine(String keyword) {
-        String url = "https://e69e033e6b5f461db0d97431ac9ce409.es.us-east-1.aws.elastic.cloud:443/post/_search?q=" + URLEncoder.encode(keyword, StandardCharsets.UTF_8);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .setHeader("Authorization", "ApiKey alI1LVVJOEI3eGJfdmZvUkMxQWQ6MHp2MHJXQ0VSMk85bXdNVGlrLWgxZw==")
-                .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .build();
-
-        List<String> idList = null;
-        try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            String responseBody = response.body();
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode rootNode = mapper.readTree(responseBody);
-
-            idList = new ArrayList<>();
-
-            JsonNode hitsNode = rootNode.path("hits").path("hits");
-            for (JsonNode hitNode : hitsNode) {
-                if (hitNode.has("_id")) {
-                    String id = hitNode.get("_id").asText();
-                    idList.add(id);
-                }
-            }
-            System.out.println(responseBody);
-            System.out.println("Extracted IDs:");
-            idList.forEach(System.out::println);
-
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        return idList;
+        PostDocument document = postElasticsearchRepository.save(postDocument);
+        post.setEsId(document.getId());
     }
 
 }
