@@ -20,9 +20,11 @@ import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -288,5 +290,45 @@ public class PostService {
         postElasticsearchRepository.save(postDocument);
     }
 
+
+
+    public List<String> SearchEngine(String keyword) {
+        String url = "https://e69e033e6b5f461db0d97431ac9ce409.es.us-east-1.aws.elastic.cloud:443/post/_search?q=" + URLEncoder.encode(keyword, StandardCharsets.UTF_8);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .setHeader("Authorization", "ApiKey alI1LVVJOEI3eGJfdmZvUkMxQWQ6MHp2MHJXQ0VSMk85bXdNVGlrLWgxZw==")
+                .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .build();
+
+        List<String> idList = null;
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            String responseBody = response.body();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(responseBody);
+
+            idList = new ArrayList<>();
+
+            JsonNode hitsNode = rootNode.path("hits").path("hits");
+            for (JsonNode hitNode : hitsNode) {
+                if (hitNode.has("_id")) {
+                    String id = hitNode.get("_id").asText();
+                    idList.add(id);
+                }
+            }
+            System.out.println(responseBody);
+            System.out.println("Extracted IDs:");
+            idList.forEach(System.out::println);
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return idList;
+    }
 
 }

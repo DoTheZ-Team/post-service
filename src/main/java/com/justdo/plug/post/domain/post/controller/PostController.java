@@ -143,7 +143,8 @@ public class PostController {
         return postHashtagService.getHashtagsBlog(blogId);
 
     }
-
+    
+    // kylo es 
     @GetMapping("/search")
     public List<PostSearchDTO> searchElastic(@RequestParam String q) {
 
@@ -155,5 +156,10 @@ public class PostController {
         postService.savePostIndex();
     }
 
+    // GLUE269: Post에 대한 검색엔진
+    @GetMapping("search/{keyword}")
+    public List<String> showSearchResult(@PathVariable String keyword){
+        return postService.SearchEngine(keyword);
+    }
 
 }
