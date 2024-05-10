@@ -7,6 +7,7 @@ import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
+import com.justdo.plug.post.domain.post.dto.PostSearchDTO;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemList;
 import com.justdo.plug.post.domain.post.service.PostService;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
@@ -141,6 +142,18 @@ public class PostController {
     public List<String> ViewHashtagsBlog(@PathVariable Long blogId){
         return postHashtagService.getHashtagsBlog(blogId);
 
+    }
+    
+    // kylo es 
+    @GetMapping("/search")
+    public List<PostSearchDTO> searchElastic(@RequestParam String q) {
+
+        return postService.searchPost(q);
+    }
+
+    @PostMapping("/test")
+    public void saveDoc() {
+        postService.savePostIndex();
     }
 
     // GLUE269: Post에 대한 검색엔진
