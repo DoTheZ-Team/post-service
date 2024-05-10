@@ -143,4 +143,10 @@ public class PostController {
 
     }
 
+    // GLUE269: Post에 대한 검색엔진
+    @GetMapping("search/{keyword}")
+    public List<String> showSearchResult(@PathVariable String keyword){
+        return postService.SearchEngine(keyword);
+    }
+
 }
