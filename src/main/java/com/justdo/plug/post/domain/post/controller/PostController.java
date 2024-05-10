@@ -93,10 +93,9 @@ public class PostController {
     }
 
     // BLOG005: 게시글 삭제 요청
-    @DeleteMapping("{postId}")
-    public PostRequestDto DeleteBlog(@PathVariable Long postId) {
-        /*service*/
-        return null;
+    @GetMapping("delete/{id}")
+    public String deletePost(@PathVariable String id){
+        return postService.deletePost(id);
     }
 
     // BLOG006: 블로그 게시글 리스트 조회 요청
@@ -147,9 +146,9 @@ public class PostController {
     // kylo es 
     @GetMapping("search")
     public List<PostSearchDTO> searchElastic(@RequestParam String keyword) {
-
         return postService.searchPost(keyword);
     }
+
 
 
 }
