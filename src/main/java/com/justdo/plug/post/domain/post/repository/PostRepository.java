@@ -13,6 +13,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByBlogId(Long blogId);
 
+    List<Post> findTop4ByBlogIdOrderByCreatedAtDesc(Long blogId);
+
     List<Post> findByMemberId(Long memberId);
 
     @Query("SELECT p FROM Post p WHERE p.blogId in :blogIdList")

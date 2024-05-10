@@ -9,6 +9,7 @@ import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
 import com.justdo.plug.post.domain.post.dto.PostSearchDTO;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse;
+import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemList;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
@@ -17,7 +18,6 @@ import com.justdo.plug.post.elastic.PostDocument;
 import com.justdo.plug.post.elastic.PostElasticsearchRepository;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
-import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -28,7 +28,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,9 +36,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PostService {
 
@@ -71,6 +71,7 @@ public class PostService {
     }
 
     // BLOG003: 블로그 작성
+    @Transactional
     public Post save(PostRequestDto requestDto) throws JsonProcessingException {
         Post post = requestDto.toEntity();
 
@@ -114,7 +115,8 @@ public class PostService {
 
             for (PostHashtag postHashtag : postHashtags) {
                 // 아이디에서 해시태그 명으로 변경 후 리스트에 저장
-                String hashtagName = hashtagService.getHashtagNameById(postHashtag.getHashtagId());
+                String hashtagName = hashtagService.getHashtagNameById(
+                    postHashtag.getHashtag().getId());
                 hashtagNames.add(hashtagName);
             }
         }
@@ -148,8 +150,10 @@ public class PostService {
         return extractedTexts.toString().trim();
     }
 
-    // 게시글의 preview 값 저장
-    public String savePreviewPost(String content) throws JsonProcessingException {
+    /**
+     * 게시글의 preview 값 저장
+     */
+    public String parseContent(String content) throws JsonProcessingException {
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonArray = mapper.readTree(content);
@@ -186,10 +190,14 @@ public class PostService {
         return PreviewResponse.toPostItemList(posts);
     }
 
+    /**
+     * Elastic Search를 통한 Post 검색 (title, content, hashtag)
+     */
     public List<PostSearchDTO> searchPost(String keyword) {
 
         // Elasticsearch URL
-        String searchUrl = url + "/post/_search?q=" + URLEncoder.encode(keyword, StandardCharsets.UTF_8);
+        String searchUrl =
+            url + "/post/_search?q=" + URLEncoder.encode(keyword, StandardCharsets.UTF_8);
 
         // Request Header
         HttpRequest request = HttpRequest.newBuilder()
@@ -229,21 +237,42 @@ public class PostService {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-        List<Long> newPostSearchDTOListBlogId = postSearchDTOListBlogId.stream().distinct().collect(Collectors.toList());
-        List<Long> newPostSearchDTOListPostId = postSearchDTOListPostId.stream().distinct().collect(Collectors.toList());
+        List<Long> newPostSearchDTOListBlogId = postSearchDTOListBlogId.stream().distinct()
+            .collect(Collectors.toList());
+        List<Long> newPostSearchDTOListPostId = postSearchDTOListPostId.stream().distinct()
+            .collect(Collectors.toList());
 
         System.out.println("postSearchDTOListBlogId = " + newPostSearchDTOListBlogId);
         System.out.println("postSearchDTOListPostId = " + newPostSearchDTOListPostId);
 
-
-
         return postSearchDTOList;
     }
 
+    /**
+     * Elastic Search Post Document 생성
+     */
+    @Transactional
     public void savePostIndex(Post post) {
         PostDocument postDocument = PostDocument.toDocument(post);
         PostDocument document = postElasticsearchRepository.save(postDocument);
         post.setEsId(document.getId());
     }
 
+    /**
+     * 최신 postItem 4개 조회
+     */
+    public List<PostItem> getPostItemList(List<Post> posts) {
+
+        return posts.stream()
+            .map(PreviewResponse::toPostItem)
+            .toList();
+    }
+
+    /**
+     * 최신 post 4개 조회
+     */
+    public List<Post> getRecent4Post(Long blogId) {
+
+        return postRepository.findTop4ByBlogIdOrderByCreatedAtDesc(blogId);
+    }
 }
