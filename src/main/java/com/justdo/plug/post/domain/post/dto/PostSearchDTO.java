@@ -16,5 +16,6 @@ public class PostSearchDTO {
     private String preview;
     private Long blogId;
     private Long memberId;
+    private String _class;
 
 }
