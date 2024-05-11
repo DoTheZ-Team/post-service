@@ -10,11 +10,12 @@ import com.justdo.plug.post.domain.post.dto.PostSearchDTO;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.BlogPostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
-import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemList;
+import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
 import com.justdo.plug.post.domain.post.service.PostService;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -120,17 +121,17 @@ public class PostController {
 
     }
 
-    @Operation(summary = "Post 미리보기에서 내가 구독한 사용자 포스트 조회 요청 (구독 페이지)", description = "Open Feign을 통해 사용되는 API입니다.")
-    @PostMapping("preview")
-    public PostItemList findPreviewByBlogIds(@RequestBody List<Long> blogIdList,
+    @Operation(summary = "내가 구독하는 블로그 (구독 페이지) - Post 미리보기에서 내가 구독한 사용자 Post 조회 요청", description = "Open Feign을 통해 사용되는 API입니다.")
+    @PostMapping("preview/subscriptions")
+    public PostItemSlice findPreviewByBlogIds(@RequestBody List<Long> blogIdList,
         @RequestParam int page) {
 
         return postService.findPreviewList(blogIdList, page);
     }
 
     @PostMapping("preview/subscribers")
-    @Operation(summary = "Post 미리보기에서 나를 구독한 사용자 포스트 조회 요청 (구독 페이지)", description = "Open Feign을 통해 사용되는 API입니다.")
-    public PostItemList findPreviewByMemberIds(@RequestBody List<Long> memberIdList,
+    @Operation(summary = "나를 구독하는 블로그 (구독 페이지) - Post 미리보기에서 나를 구독한 사용자 포스트 조회 요청", description = "Open Feign을 통해 사용되는 API입니다.")
+    public PostItemSlice findPreviewByMemberIds(@RequestBody List<Long> memberIdList,
         @RequestParam int page) {
 
         return postService.findPreviewsByMember(memberIdList, page);
@@ -139,7 +140,7 @@ public class PostController {
     /**
      * 포스트 목록 조회 (개인 블로그 조회 페이지) -> open feign
      */
-    @Operation(summary = "최신 Post 4개 조회 요청", description = "Open Feign을 통해 사용되는 API입니다.")
+    @Operation(summary = "내 블로그 - 최신 Post 4개 조회 요청", description = "Open Feign을 통해 사용되는 API입니다.")
     @Parameter(name = "blogId", description = "블로그의 Id, Path Variable입니다.", required = true, in = ParameterIn.PATH)
     @GetMapping("blogs/{blogId}")
     public BlogPostItem findBlogPosts(@PathVariable Long blogId) {
@@ -152,6 +153,18 @@ public class PostController {
         return PreviewResponse.toBlogPostItem(postItemList, hashtagNames);
     }
 
+    @Operation(summary = "내 블로그 전체글 - 블로그의 포스트를 페이징 조회합니다", description = "Post를 최신순 7개씩 반환합니다.")
+    @Parameters({
+        @Parameter(name = "blogId", description = "블로그의 Id, Path Variable입니다.", required = true, in = ParameterIn.PATH),
+        @Parameter(name = "page", description = "페이지 번호, Query String입니다.", required = true, in = ParameterIn.QUERY)
+    })
+    @GetMapping("blogs/{blogId}/stories")
+    public PreviewResponse.StoryItem getStories(@PathVariable Long blogId,
+        @RequestParam(value = "page", defaultValue = "0") int page) {
+
+        return postService.findStories(blogId, page);
+    }
+
     // BLOG009: 블로그 아이디로 해시태그 추출하기
     @GetMapping("blogId/{blogId}")
     public List<String> ViewHashtagsBlog(@PathVariable Long blogId) {
@@ -159,8 +172,7 @@ public class PostController {
 
     }
 
-    // kylo ES
-    @Operation(summary = "Post 검색 요청", description = "Post의 title, content, hashtagName을 기반으로 검색을 진행합니다.")
+    @Operation(summary = "검색 페이지 - Post 검색을 요청합니다.", description = "Post의 title, content, hashtagName을 기반으로 검색을 진행합니다.")
     @Parameter(name = "keyword", description = "keyword는 검색어이며, QueryString 입니다.", required = true, example = "종강", in = ParameterIn.QUERY)
     @GetMapping("search")
     public List<PostSearchDTO> searchElastic(@RequestParam String keyword) {
