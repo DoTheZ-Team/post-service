@@ -99,7 +99,7 @@ public class PostController {
     }
 
     // BLOG005: 게시글 삭제 요청
-    @GetMapping("delete/{id}")
+    @DeleteMapping("delete/{id}")
     public String deletePost(@PathVariable String id){
         return postService.deletePost(id);
     }
