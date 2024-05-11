@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
-import com.justdo.plug.post.domain.photo.service.PhotoService;
+import com.justdo.plug.post.domain.photo.Photo;
+import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
@@ -15,6 +16,7 @@ import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.StoryItem;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
+import com.justdo.plug.post.domain.posthashtag.repository.PostHashtagRepository;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.elastic.PostDocument;
 import com.justdo.plug.post.elastic.PostElasticsearchRepository;
@@ -50,7 +52,10 @@ public class PostService {
     private final PostHashtagService postHashtagService;
     private final HashtagService hashtagService;
     private final PostElasticsearchRepository postElasticsearchRepository;
-    private final PhotoService photoService;
+
+    private final PostHashtagRepository postHashtagRepository;
+    private final PhotoRepository photoRepository;
+
 
     @Value("${spring.elasticsearch.uris}")
     private String url;
@@ -264,6 +269,52 @@ public class PostService {
         PostDocument postDocument = PostDocument.toDocument(post);
         PostDocument document = postElasticsearchRepository.save(postDocument);
         post.setEsId(document.getId());
+    }
+  
+    public String deletePost(String id){
+
+        // MySQL
+        // EsId 값으로 Post를 찾기
+        /*
+        Post post = postRepository.findByEsId(id)
+                .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
+
+        Long postId = post.getId();
+        List<PostHashtag> postHashtags = postHashtagRepository.findByPostId(postId);
+        postHashtagRepository.deleteAll(postHashtags);
+
+        List<Photo> photos = photoRepository.findByPostId(postId);
+        photoRepository.deleteAll(photos);
+
+        // 찾은 Post 삭제
+        postRepository.delete(post);
+
+         */
+
+
+        // Elasticsearch
+        String deleteUrl = url + "/post/_doc/" + URLEncoder.encode(id, StandardCharsets.UTF_8);;
+
+        HttpRequest deleteRequest = HttpRequest.newBuilder()
+                .uri(URI.create(deleteUrl))
+                .header("Authorization", "ApiKey " + apiKey)
+                .DELETE()
+                .build();
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> deleteResponse = client.send(deleteRequest, HttpResponse.BodyHandlers.ofString());
+
+            if (deleteResponse.statusCode() == 200) {
+               return "게시글이 삭제되었습니다.";
+            } else {
+                return "게시글 삭제도중 오류가 발생하였습니다: " + deleteResponse.statusCode();
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return e.toString();
+        }
+
     }
 
     /**

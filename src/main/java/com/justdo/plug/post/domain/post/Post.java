@@ -46,7 +46,7 @@ public class Post extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String preview;
 
-    @Column
+    @Column(nullable = false, updatable = false)
     private String esId;
 
 }

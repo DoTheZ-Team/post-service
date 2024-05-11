@@ -99,10 +99,9 @@ public class PostController {
     }
 
     // BLOG005: 게시글 삭제 요청
-    @DeleteMapping("{postId}")
-    public PostRequestDto DeleteBlog(@PathVariable Long postId) {
-        /*service*/
-        return null;
+    @GetMapping("delete/{id}")
+    public String deletePost(@PathVariable String id){
+        return postService.deletePost(id);
     }
 
     // BlOG007: 특정 멤버가 사용한 HASHTAG 값 조회
@@ -176,9 +175,9 @@ public class PostController {
     @Parameter(name = "keyword", description = "keyword는 검색어이며, QueryString 입니다.", required = true, example = "종강", in = ParameterIn.QUERY)
     @GetMapping("search")
     public List<PostSearchDTO> searchElastic(@RequestParam String keyword) {
-
         return postService.searchPost(keyword);
     }
+
 
 
 }
