@@ -22,6 +22,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Set environment yml file
+        run: |
+          mkdir ./src/main/resources
+          cd ./src/main/resources
+          touch ./application.yml
+          echo "${{ secrets.APPLICATION }}" >> ./application.yml
+        shell: bash
+
       - name: Build with Gradle
         run: ./gradlew build
 
