@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.photo.Photo;
 import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
+import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
@@ -52,6 +53,7 @@ public class PostService {
     private final PostHashtagService postHashtagService;
     private final HashtagService hashtagService;
     private final PostElasticsearchRepository postElasticsearchRepository;
+    private final PhotoService photoService;
 
     private final PostHashtagRepository postHashtagRepository;
     private final PhotoRepository photoRepository;
