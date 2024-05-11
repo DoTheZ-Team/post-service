@@ -12,7 +12,8 @@ import com.justdo.plug.post.domain.post.dto.PostResponseDto;
 import com.justdo.plug.post.domain.post.dto.PostSearchDTO;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
-import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemList;
+import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
+import com.justdo.plug.post.domain.post.dto.PreviewResponse.StoryItem;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
 import com.justdo.plug.post.domain.posthashtag.repository.PostHashtagRepository;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -50,8 +52,10 @@ public class PostService {
     private final PostHashtagService postHashtagService;
     private final HashtagService hashtagService;
     private final PostElasticsearchRepository postElasticsearchRepository;
+
     private final PostHashtagRepository postHashtagRepository;
     private final PhotoRepository photoRepository;
+
 
     @Value("${spring.elasticsearch.uris}")
     private String url;
@@ -179,20 +183,24 @@ public class PostService {
         return extractedTexts.toString().trim();
     }
 
-    public PostItemList findPreviewList(List<Long> blogIdList, int page) {
+    public PostItemSlice findPreviewList(List<Long> blogIdList, int page) {
 
         PageRequest pageRequest = PageRequest.of(page, 10, Sort.by("createdAt"));
         Slice<Post> posts = postRepository.findByBlogIdList(blogIdList, pageRequest);
 
-        return PreviewResponse.toPostItemList(posts);
+        List<String> photoUrls = photoService.findPhotoUrlsByPosts(posts.getContent());
+
+        return PreviewResponse.toPostItemSlice(posts, photoUrls);
     }
 
-    public PostItemList findPreviewsByMember(List<Long> memberIdList, int page) {
+    public PostItemSlice findPreviewsByMember(List<Long> memberIdList, int page) {
 
         PageRequest pageRequest = PageRequest.of(page, 10, Sort.by("createdAt"));
         Slice<Post> posts = postRepository.findByMemberIdList(memberIdList, pageRequest);
 
-        return PreviewResponse.toPostItemList(posts);
+        List<String> photoUrls = photoService.findPhotoUrlsByPosts(posts.getContent());
+
+        return PreviewResponse.toPostItemSlice(posts, photoUrls);
     }
 
     /**
@@ -314,9 +322,9 @@ public class PostService {
      */
     public List<PostItem> getPostItemList(List<Post> posts) {
 
-        return posts.stream()
-            .map(PreviewResponse::toPostItem)
-            .toList();
+        List<String> photoUrls = photoService.findPhotoUrlsByPosts(posts);
+
+        return PreviewResponse.toPostItemList(posts, photoUrls);
     }
 
     /**
@@ -327,4 +335,19 @@ public class PostService {
         return postRepository.findTop4ByBlogIdOrderByCreatedAtDesc(blogId);
     }
 
+    /**
+     * Post Paging
+     */
+    public StoryItem findStories(Long blogId, int page) {
+
+        PageRequest pageRequest = PageRequest.of(page, 7, Sort.by("id").descending());
+
+        Page<Post> posts = postRepository.findAllByBlogId(blogId, pageRequest);
+
+        List<String> photoUrlList = posts.stream()
+            .map(post -> photoService.findPhotoByPostId(post.getId()))
+            .toList();
+
+        return PreviewResponse.toStoryItem(posts, photoUrlList);
+    }
 }
