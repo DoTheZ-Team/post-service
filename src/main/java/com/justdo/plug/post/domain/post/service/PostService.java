@@ -4,8 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
-import com.justdo.plug.post.domain.photo.Photo;
-import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
+import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
@@ -16,7 +15,6 @@ import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.StoryItem;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
-import com.justdo.plug.post.domain.posthashtag.repository.PostHashtagRepository;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.elastic.PostDocument;
 import com.justdo.plug.post.elastic.PostElasticsearchRepository;
@@ -53,8 +51,7 @@ public class PostService {
     private final HashtagService hashtagService;
     private final PostElasticsearchRepository postElasticsearchRepository;
 
-    private final PostHashtagRepository postHashtagRepository;
-    private final PhotoRepository photoRepository;
+    private final PhotoService photoService;
 
 
     @Value("${spring.elasticsearch.uris}")
