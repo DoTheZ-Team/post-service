@@ -15,8 +15,13 @@ public class PhotoService {
 
     private final PhotoRepository photoRepository;
 
-    public void createPhoto(String photoUrl, Post post) {
-        photoRepository.save(new Photo(photoUrl, post));
+    public void createPhoto(List<String> photoUrls, Post post) {
+
+        List<Photo> photoList = photoUrls.stream()
+            .map(photo -> new Photo(photo, post))
+            .toList();
+
+        photoRepository.saveAll(photoList);
     }
 
     public String findPhotoByPostId(Long postId) {
