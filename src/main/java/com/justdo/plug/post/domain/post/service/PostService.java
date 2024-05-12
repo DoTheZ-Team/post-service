@@ -290,7 +290,7 @@ public class PostService {
 
 
         // Elasticsearch
-        String deleteUrl = url + "/post/_doc/" + URLEncoder.encode(id, StandardCharsets.UTF_8);;
+        String deleteUrl = url + "/post/_doc/" + URLEncoder.encode(id, StandardCharsets.UTF_8);
 
         HttpRequest deleteRequest = HttpRequest.newBuilder()
                 .uri(URI.create(deleteUrl))
@@ -350,11 +350,12 @@ public class PostService {
 
     public String UpdatePost(String id, PostUpdateDto updateDto) throws JsonProcessingException {
 
-        /*
+
         String content = updateDto.getContent();
         String preview = parseContent(content);
         updateDto.setPreview(preview);
 
+        /*
         Post post = postRepository.findByEsId(id)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
         post.setContent(updateDto.getContent());
@@ -375,7 +376,7 @@ public class PostService {
         }
 
         // Elasticsearch
-        String updateURL = url + "/post/_update/" + URLEncoder.encode(id, StandardCharsets.UTF_8);;
+        String updateURL = url + "/post/_update/" + URLEncoder.encode(id, StandardCharsets.UTF_8);
 
         HttpRequest updateRequest = HttpRequest.newBuilder()
                 .uri(URI.create(updateURL))
