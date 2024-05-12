@@ -17,7 +17,7 @@ public class PostRequestDto {
     private long blogId;
     private List<String> hashtags;
     private String name;
-    private String photoUrl;
+    private List<String> photoUrl;
     private String preview;
 
     public Post toEntity(){
