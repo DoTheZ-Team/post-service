@@ -2,25 +2,25 @@ package com.justdo.plug.post.domain.category.service;
 
 import com.justdo.plug.post.domain.category.Category;
 import com.justdo.plug.post.domain.category.repository.CategoryRepository;
-import jakarta.transaction.Transactional;
-import lombok.Builder;
+import com.justdo.plug.post.domain.post.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
-
 public class CategoryService {
+
     private final CategoryRepository categoryRepository;
 
+    @Transactional
+    public void createCategory(String name, Post post) {
 
-    public void createCategory(String name, Long postId){
-
-        Category category = Category.builder().name(name).postId(postId).build();
-        save(category);
+        save(new Category(name, post));
     }
-    public void save(Category category){
+
+    public void save(Category category) {
         categoryRepository.save(category);
     }
 }

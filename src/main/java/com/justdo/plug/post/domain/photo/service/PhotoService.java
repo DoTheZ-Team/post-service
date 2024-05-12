@@ -5,6 +5,7 @@ import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.post.Post;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +16,12 @@ public class PhotoService {
 
     private final PhotoRepository photoRepository;
 
-    public void createPhoto(String photoUrl, Post post) {
-        photoRepository.save(new Photo(photoUrl, post));
+    public void createPhoto(List<String> photoUrls, Post post) {
+
+        Optional.ofNullable(photoUrls)
+            .ifPresent(list -> list.forEach(photoUrl -> {
+                photoRepository.save(new Photo(photoUrl, post));
+            }));
     }
 
     public String findPhotoByPostId(Long postId) {

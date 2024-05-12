@@ -1,34 +1,30 @@
 package com.justdo.plug.post.domain.post.dto;
 
 import com.justdo.plug.post.domain.post.Post;
-import lombok.*;
-
 import java.util.List;
+import lombok.Builder;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
 public class PostRequestDto {
+
     private String title;
     private String content;
-    private int likeCount;
     private boolean temporaryState;
-    private boolean state;
-    private long memberId;
-    private long blogId;
     private List<String> hashtags;
-    private String name;
-    private String photoUrl;
-    private String preview;
+    private String categoryName;
+    private List<String> photoUrls;
+    private Long memberId; // TODO : JWT 토큰으로 처리할 것
 
-    public Post toEntity(){
+    public Post toEntity(PostRequestDto postRequestDto, String preview, Long blogId) {
         return Post.builder()
-                .title(title)
-                .content(content)
-                .temporaryState(temporaryState)
-                .state(state)
-                .memberId(memberId)
-                .blogId(blogId)
-                .preview(preview)
-                .build();
+            .title(postRequestDto.getTitle())
+            .content(postRequestDto.getContent())
+            .temporaryState(postRequestDto.temporaryState)
+            .memberId(postRequestDto.getMemberId())
+            .blogId(blogId)
+            .preview(preview)
+            .build();
     }
 }

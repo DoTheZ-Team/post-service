@@ -45,6 +45,8 @@ dependencies {
 	// config
 	// implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
+	// open feign
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 }
 
 dependencyManagement {

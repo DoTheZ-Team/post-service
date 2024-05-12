@@ -10,6 +10,7 @@ import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,16 +30,18 @@ public class PostHashtagService {
     @Transactional
     public void createHashtag(List<String> hashtags, Post post) {
 
-        for (String hashtag : hashtags) {
-            // 해시태그 이름으로 해시태그 ID를 가져오는 메서드
-            Hashtag findHashtag = hashtagService.getHashtagIdByName(hashtag);
+        Optional.ofNullable(hashtags)
+            .ifPresent(list -> list.forEach(hashtag -> {
 
-            // Post_Hashtag 엔티티 생성
-            PostHashtag postHashtag = new PostHashtag(post, findHashtag);
+                // 해시태그 이름으로 해시태그 ID를 가져오는 메서드
+                Hashtag findHashtag = hashtagService.getHashtagIdByName(hashtag);
 
-            // Post_Hashtag 엔티티 저장
-            save(postHashtag);
-        }
+                // Post_Hashtag 엔티티 생성
+                PostHashtag postHashtag = new PostHashtag(post, findHashtag);
+
+                // Post_Hashtag 엔티티 저장
+                save(postHashtag);
+            }));
     }
 
     // BLOG009: 블로그 아이디로 해시태그 추출하기
