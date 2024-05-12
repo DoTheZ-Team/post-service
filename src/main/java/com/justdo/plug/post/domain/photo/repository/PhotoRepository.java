@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PhotoRepository extends JpaRepository<Photo, Long> {
+
     Optional<Photo> findFirstByPostId(Long postId);
 }

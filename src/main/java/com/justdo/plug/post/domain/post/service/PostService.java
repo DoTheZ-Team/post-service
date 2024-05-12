@@ -3,16 +3,22 @@ package com.justdo.plug.post.domain.post.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.justdo.plug.post.domain.blog.BlogClient;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponseDto;
-import com.justdo.plug.post.domain.post.dto.PostSearchDTO;
+import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.StoryItem;
+import com.justdo.plug.post.domain.post.dto.SearchResponse;
+import com.justdo.plug.post.domain.post.dto.SearchResponse.BlogInfoItem;
+import com.justdo.plug.post.domain.post.dto.SearchResponse.PostSearch;
+import com.justdo.plug.post.domain.post.dto.SearchResponse.PostSearchItem;
+import com.justdo.plug.post.domain.post.dto.SearchResponse.SearchInfo;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
@@ -28,13 +34,15 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
@@ -51,6 +59,8 @@ public class PostService {
     private final HashtagService hashtagService;
     private final PostElasticsearchRepository postElasticsearchRepository;
     private final PhotoService photoService;
+    private final BlogClient blogClient;
+
 
     @Value("${spring.elasticsearch.uris}")
     private String url;
@@ -76,11 +86,15 @@ public class PostService {
 
     // BLOG003: 블로그 작성
     @Transactional
-    public Post save(PostRequestDto requestDto) throws JsonProcessingException {
-        Post post = requestDto.toEntity();
+    public Post save(PostRequestDto requestDto, Long blogId) throws JsonProcessingException {
 
+        String preview = parseContent(requestDto.getContent());
+
+        Post post = requestDto.toEntity(requestDto, preview, blogId);
         Post save = postRepository.save(post);
-        savePostIndex(post);
+
+        String esId = savePostIndex(save);
+        post.setEsId(esId);
 
         System.out.println(post.getEsId());
         return save;
@@ -201,69 +215,139 @@ public class PostService {
     /**
      * Elastic Search를 통한 Post 검색 (title, content, hashtag)
      */
-    public List<PostSearchDTO> searchPost(String keyword) {
-
-        // Elasticsearch URL
-        String searchUrl =
-            url + "/post/_search?q=" + URLEncoder.encode(keyword, StandardCharsets.UTF_8);
-
-        // Request Header
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(searchUrl))
-            .setHeader("Authorization", "ApiKey " + apiKey)
-            .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .build();
-
-        // Search Result
-        List<PostSearchDTO> postSearchDTOList = new ArrayList<>();
-        List<Long> postSearchDTOListPostId = new ArrayList<>();
-        List<Long> postSearchDTOListBlogId = new ArrayList<>();
+    public SearchInfo searchPost(String keyword, Pageable pageable) {
 
         try {
+            // paging
+            int size = pageable.getPageSize();
+            int from = pageable.getPageNumber() * size;
+
+            // Elasticsearch URL
+            String searchUrl =
+                url + "/post/_search?q=" + URLEncoder.encode(keyword, StandardCharsets.UTF_8)
+                    + "&from=" + from + "&size=" + size + "&sort=postId:desc";
+
+            // Request Header
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(searchUrl))
+                .setHeader("Authorization", "ApiKey " + apiKey)
+                .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .build();
+
+            // Search Result
             HttpClient client = HttpClient.newHttpClient();
             HttpResponse<String> response = client.send(request,
                 HttpResponse.BodyHandlers.ofString());
             String responseBody = response.body();
+
             System.out.println(responseBody);
 
+            // Result Parsing
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(responseBody);
+            JsonNode rootNode = objectMapper.readTree(responseBody);
+
+            // 검색된 데이터 총 개수
+            int totalValue = rootNode.path("hits").path("total").path("value").asInt();
+            System.out.println("totalValue = " + totalValue);
 
             // search 결과 리스트 반환
-            JsonNode hitsNode = jsonNode.path("hits").path("hits");
+            List<SearchResponse.PostSearch> searchResponseList = new ArrayList<>();
+            List<Long> postIdList = new ArrayList<>(); // Photo 조회
+            List<Long> blogIdList = new ArrayList<>(); // Blog 조회
+            JsonNode hitsNode = rootNode.path("hits").path("hits");
 
             for (JsonNode hit : hitsNode) {
                 JsonNode sourceNode = hit.path("_source");
 
                 // PostSearchDTO로 매핑
-                PostSearchDTO postSearchDTO = objectMapper.treeToValue(sourceNode,
-                    PostSearchDTO.class);
-                postSearchDTOList.add(postSearchDTO);
-                postSearchDTOListPostId.add(postSearchDTO.getPostId());
-                postSearchDTOListBlogId.add(postSearchDTO.getBlogId());
+                PostSearch postSearch = objectMapper.treeToValue(sourceNode,
+                    PostSearch.class);
+                searchResponseList.add(postSearch);
+                postIdList.add(postSearch.getPostId());
+                blogIdList.add(postSearch.getBlogId());
             }
+            List<Long> distinctBlogId = blogIdList.stream().distinct()
+                .toList();
+            List<Long> distinctPostId = postIdList.stream().distinct()
+                .toList();
+
+            List<String> photoUrls = postIdList.stream()
+                .map(photoService::findPhotoByPostId)
+                .toList();
+
+            BlogInfoItem blogInfoItem = blogClient.findBlogInfoItem(distinctBlogId,
+                pageable.getPageNumber());
+
+            System.out.println("postSearchDTOListBlogId = " + distinctBlogId);
+            System.out.println("postSearchDTOListPostId = " + distinctPostId);
+
+            PostSearchItem postSearchItem = SearchResponse.toPostSearchItem(searchResponseList,
+                photoUrls,
+                pageable, totalValue);
+
+            return SearchResponse.toSearchInfo(postSearchItem, blogInfoItem);
+
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-        List<Long> newPostSearchDTOListBlogId = postSearchDTOListBlogId.stream().distinct()
-            .collect(Collectors.toList());
-        List<Long> newPostSearchDTOListPostId = postSearchDTOListPostId.stream().distinct()
-            .collect(Collectors.toList());
 
-        System.out.println("postSearchDTOListBlogId = " + newPostSearchDTOListBlogId);
-        System.out.println("postSearchDTOListPostId = " + newPostSearchDTOListPostId);
-
-        return postSearchDTOList;
+        return null;
     }
 
     /**
      * Elastic Search Post Document 생성
      */
     @Transactional
-    public void savePostIndex(Post post) {
+    public String savePostIndex(Post post) {
         PostDocument postDocument = PostDocument.toDocument(post);
         PostDocument document = postElasticsearchRepository.save(postDocument);
-        post.setEsId(document.getId());
+        return document.getId();
+    }
+
+    public String deletePost(String id) {
+
+        // MySQL
+        // EsId 값으로 Post를 찾기
+        /*
+        Post post = postRepository.findByEsId(id)
+                .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
+
+        Long postId = post.getId();
+        List<PostHashtag> postHashtags = postHashtagRepository.findByPostId(postId);
+        postHashtagRepository.deleteAll(postHashtags);
+
+        List<Photo> photos = photoRepository.findByPostId(postId);
+        photoRepository.deleteAll(photos);
+
+        // 찾은 Post 삭제
+        postRepository.delete(post);
+
+         */
+
+        // Elasticsearch
+        String deleteUrl = url + "/post/_doc/" + URLEncoder.encode(id, StandardCharsets.UTF_8);
+
+        HttpRequest deleteRequest = HttpRequest.newBuilder()
+            .uri(URI.create(deleteUrl))
+            .header("Authorization", "ApiKey " + apiKey)
+            .DELETE()
+            .build();
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> deleteResponse = client.send(deleteRequest,
+                HttpResponse.BodyHandlers.ofString());
+
+            if (deleteResponse.statusCode() == 200) {
+                return "게시글이 삭제되었습니다.";
+            } else {
+                return "게시글 삭제도중 오류가 발생하였습니다: " + deleteResponse.statusCode();
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return e.toString();
+        }
+
     }
 
     /**
@@ -298,5 +382,67 @@ public class PostService {
             .toList();
 
         return PreviewResponse.toStoryItem(posts, photoUrlList);
+    }
+
+    public String UpdatePost(String id, PostUpdateDto updateDto) throws JsonProcessingException {
+
+        String content = updateDto.getContent();
+        String preview = parseContent(content);
+
+        /*
+        Post post = postRepository.findByEsId(id)
+                .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
+        post.setContent(updateDto.getContent());
+        post.setPreview(preview);
+        post.setTitle(updateDto.getTitle());
+         */
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonBody;
+        try {
+            Map<String, Object> docFields = new HashMap<>();
+            docFields.put("title", updateDto.getTitle());
+            docFields.put("content", updateDto.getContent());
+            docFields.put("hashtags", updateDto.getHashtags());
+            docFields.put("categoryName", updateDto.getCategoryName());
+            docFields.put("photoUrl", updateDto.getPhotoUrl());
+            docFields.put("preview", preview);
+
+            // "doc" 필드 아래에 updateDto 객체를 넣어서 JSON 문자열로 변환
+            Map<String, Object> requestBodyMap = new HashMap<>();
+            requestBodyMap.put("doc", docFields);
+            jsonBody = objectMapper.writeValueAsString(requestBodyMap);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return "게시글 수정 중 오류 발생: " + e.getMessage();
+        }
+
+        // Elasticsearch
+        String updateURL = url + "/post/_update/" + URLEncoder.encode(id, StandardCharsets.UTF_8);
+
+        HttpRequest updateRequest = HttpRequest.newBuilder()
+            .uri(URI.create(updateURL))
+            .header("Authorization", "ApiKey " + apiKey)
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+            .build();
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> updateResponse = client.send(updateRequest,
+                HttpResponse.BodyHandlers.ofString());
+
+            if (updateResponse.statusCode() == 200) {
+                return "게시글이 수정되었습니다.";
+            } else {
+                return "게시글 수정도중 오류가 발생하였습니다: " + updateResponse;
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            e.toString();
+
+            return e.toString();
+        }
+
     }
 }

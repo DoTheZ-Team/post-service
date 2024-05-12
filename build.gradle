@@ -43,8 +43,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 
 	// config
-	// implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
+	// open feign
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 }
 
 dependencyManagement {
