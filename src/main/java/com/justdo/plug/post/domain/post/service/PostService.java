@@ -4,14 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
-import com.justdo.plug.post.domain.photo.Photo;
 import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
-import com.justdo.plug.post.domain.post.dto.PostRequestDto;
-import com.justdo.plug.post.domain.post.dto.PostResponseDto;
-import com.justdo.plug.post.domain.post.dto.PostSearchDTO;
-import com.justdo.plug.post.domain.post.dto.PreviewResponse;
+import com.justdo.plug.post.domain.post.dto.*;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.StoryItem;
@@ -30,8 +26,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
@@ -89,7 +84,7 @@ public class PostService {
         Post save = postRepository.save(post);
         savePostIndex(post);
 
-        System.out.println(post.getEsId());
+        System.out.println("ESId" + post.getEsId());
         return save;
     }
 
@@ -351,5 +346,59 @@ public class PostService {
             .toList();
 
         return PreviewResponse.toStoryItem(posts, photoUrlList);
+    }
+
+    public String UpdatePost(String id, PostUpdateDto updateDto) throws JsonProcessingException {
+
+        /*
+        String content = updateDto.getContent();
+        String preview = parseContent(content);
+        updateDto.setPreview(preview);
+
+        Post post = postRepository.findByEsId(id)
+                .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
+        post.setContent(updateDto.getContent());
+        post.setPreview(preview);
+        post.setTitle(updateDto.getTitle());
+         */
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonBody;
+        try {
+            // "doc" 필드 아래에 updateDto 객체를 넣어서 JSON 문자열로 변환
+            Map<String, Object> requestBodyMap = new HashMap<>();
+            requestBodyMap.put("doc", updateDto);
+            jsonBody = objectMapper.writeValueAsString(requestBodyMap);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return "게시글 수정 중 오류 발생: " + e.getMessage();
+        }
+
+        // Elasticsearch
+        String updateURL = url + "/post/_update/" + URLEncoder.encode(id, StandardCharsets.UTF_8);;
+
+        HttpRequest updateRequest = HttpRequest.newBuilder()
+                .uri(URI.create(updateURL))
+                .header("Authorization", "ApiKey " + apiKey)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> updateResponse = client.send(updateRequest, HttpResponse.BodyHandlers.ofString());
+
+            if (updateResponse.statusCode() == 200) {
+                return "게시글이 수정되었습니다.";
+            } else {
+                return "게시글 수정도중 오류가 발생하였습니다: " + updateResponse;
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            e.toString();
+
+            return e.toString();
+        }
+
     }
 }

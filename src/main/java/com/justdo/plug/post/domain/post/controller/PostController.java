@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.justdo.plug.post.domain.category.service.CategoryService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
-import com.justdo.plug.post.domain.post.dto.PostRequestDto;
-import com.justdo.plug.post.domain.post.dto.PostResponseDto;
-import com.justdo.plug.post.domain.post.dto.PostSearchDTO;
-import com.justdo.plug.post.domain.post.dto.PreviewResponse;
+import com.justdo.plug.post.domain.post.dto.*;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.BlogPostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
@@ -93,9 +90,9 @@ public class PostController {
 
     // BLOG004: 게시글 수정 요청
     @PatchMapping("{postId}")
-    public PostRequestDto EditBlog(@PathVariable Long postId) {
-        /*service*/
-        return null;
+    public String EditBlog(@PathVariable String postId, @RequestBody PostUpdateDto updateDto) throws JsonProcessingException {
+
+        return postService.UpdatePost(postId, updateDto);
     }
 
     // BLOG005: 게시글 삭제 요청
@@ -107,9 +104,7 @@ public class PostController {
     // BlOG007: 특정 멤버가 사용한 HASHTAG 값 조회
     @GetMapping("memberId/{memberId}")
     public List<String> ViewHashtags(@PathVariable Long memberId) {
-
         return postHashtagService.getHashtags(memberId);
-
     }
 
     // BlOG008: 게시글의 글만 조회하기
@@ -134,6 +129,7 @@ public class PostController {
         @RequestParam int page) {
 
         return postService.findPreviewsByMember(memberIdList, page);
+
     }
 
     /**
@@ -177,7 +173,4 @@ public class PostController {
     public List<PostSearchDTO> searchElastic(@RequestParam String keyword) {
         return postService.searchPost(keyword);
     }
-
-
-
 }
