@@ -58,7 +58,6 @@ public class PostService {
     private final PostHashtagService postHashtagService;
     private final HashtagService hashtagService;
     private final PostElasticsearchRepository postElasticsearchRepository;
-
     private final PhotoService photoService;
     private final BlogClient blogClient;
 
@@ -327,7 +326,6 @@ public class PostService {
 
         // Elasticsearch
         String deleteUrl = url + "/post/_doc/" + URLEncoder.encode(id, StandardCharsets.UTF_8);
-        ;
 
         HttpRequest deleteRequest = HttpRequest.newBuilder()
             .uri(URI.create(deleteUrl))
@@ -388,11 +386,10 @@ public class PostService {
 
     public String UpdatePost(String id, PostUpdateDto updateDto) throws JsonProcessingException {
 
-        /*
         String content = updateDto.getContent();
         String preview = parseContent(content);
-        updateDto.setPreview(preview);
 
+        /*
         Post post = postRepository.findByEsId(id)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
         post.setContent(updateDto.getContent());
@@ -403,9 +400,17 @@ public class PostService {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonBody;
         try {
+            Map<String, Object> docFields = new HashMap<>();
+            docFields.put("title", updateDto.getTitle());
+            docFields.put("content", updateDto.getContent());
+            docFields.put("hashtags", updateDto.getHashtags());
+            docFields.put("categoryName", updateDto.getCategoryName());
+            docFields.put("photoUrl", updateDto.getPhotoUrl());
+            docFields.put("preview", preview);
+
             // "doc" 필드 아래에 updateDto 객체를 넣어서 JSON 문자열로 변환
             Map<String, Object> requestBodyMap = new HashMap<>();
-            requestBodyMap.put("doc", updateDto);
+            requestBodyMap.put("doc", docFields);
             jsonBody = objectMapper.writeValueAsString(requestBodyMap);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -414,7 +419,6 @@ public class PostService {
 
         // Elasticsearch
         String updateURL = url + "/post/_update/" + URLEncoder.encode(id, StandardCharsets.UTF_8);
-        ;
 
         HttpRequest updateRequest = HttpRequest.newBuilder()
             .uri(URI.create(updateURL))

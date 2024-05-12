@@ -23,6 +23,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -89,17 +90,15 @@ public class PostController {
     }
 
     // BLOG005: 게시글 삭제 요청
-    @GetMapping("delete/{id}")
-    public String deletePost(@PathVariable String id) {
+    @DeleteMapping("delete/{id}")
+    public String deletePost(@PathVariable String id){
         return postService.deletePost(id);
     }
 
     // BlOG007: 특정 멤버가 사용한 HASHTAG 값 조회
     @GetMapping("memberId/{memberId}")
     public List<String> ViewHashtags(@PathVariable Long memberId) {
-
         return postHashtagService.getHashtags(memberId);
-
     }
 
     // BlOG008: 게시글의 글만 조회하기
@@ -124,6 +123,7 @@ public class PostController {
         @RequestParam int page) {
 
         return postService.findPreviewsByMember(memberIdList, page);
+
     }
 
     /**
@@ -175,6 +175,4 @@ public class PostController {
         PageRequest pageRequest = PageRequest.of(page, size);
         return postService.searchPost(keyword, pageRequest);
     }
-
-
 }
