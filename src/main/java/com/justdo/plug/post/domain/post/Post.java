@@ -4,6 +4,7 @@ import com.justdo.plug.post.domain.common.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
 
@@ -13,12 +14,11 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Data
 public class Post extends BaseTimeEntity {
 
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "postId")
     private Long id;
 
@@ -29,24 +29,31 @@ public class Post extends BaseTimeEntity {
     private String content;
 
     @Column(nullable = false)
-    private int like_count;
+    @Builder.Default
+    private int like_count = 0;
 
     @Column(nullable = false)
-    private boolean temporaryState;
+    @Builder.Default
+    private boolean temporaryState = false;
 
     @Column(nullable = false)
-    private boolean state;
+    @Builder.Default
+    private boolean state = true;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private Long blogId;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private Long memberId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String preview;
 
-    @Column(nullable = false, updatable = false)
+    @Column
     private String esId;
+
+    public void setEsId(String esId) {
+        this.esId = esId;
+    }
 
 }
