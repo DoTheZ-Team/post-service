@@ -20,7 +20,7 @@ public class PostDocument {
     @Id
     private String id;
 
-    @Field(type = FieldType.Long, index = false, docValues = false)
+    @Field(type = FieldType.Long, index = false)
     private Long postId;
 
     @Field(type = FieldType.Text, analyzer = "nori")
@@ -29,10 +29,10 @@ public class PostDocument {
     @Field(type = FieldType.Text, analyzer = "nori")
     private String preview;
 
-    @Field(type = FieldType.Long, index = false, docValues = false)
+    @Field(type = FieldType.Long, index = false)
     private Long memberId;
 
-    @Field(type = FieldType.Long, index = false, docValues = false)
+    @Field(type = FieldType.Long, index = false)
     private Long blogId;
 
     public static PostDocument toDocument(Post post) {
