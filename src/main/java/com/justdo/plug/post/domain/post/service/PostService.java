@@ -348,7 +348,6 @@ public class PostService {
 
         String content = updateDto.getContent();
         String preview = parseContent(content);
-        updateDto.setPreview(preview);
 
         /*
         Post post = postRepository.findByEsId(id)
@@ -361,9 +360,17 @@ public class PostService {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonBody;
         try {
+            Map<String, Object> docFields = new HashMap<>();
+            docFields.put("title", updateDto.getTitle());
+            docFields.put("content", updateDto.getContent());
+            docFields.put("hashtags", updateDto.getHashtags());
+            docFields.put("categoryName", updateDto.getCategoryName());
+            docFields.put("photoUrl", updateDto.getPhotoUrl());
+            docFields.put("preview", preview);
+
             // "doc" 필드 아래에 updateDto 객체를 넣어서 JSON 문자열로 변환
             Map<String, Object> requestBodyMap = new HashMap<>();
-            requestBodyMap.put("doc", updateDto);
+            requestBodyMap.put("doc", docFields);
             jsonBody = objectMapper.writeValueAsString(requestBodyMap);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
