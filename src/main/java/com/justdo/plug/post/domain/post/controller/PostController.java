@@ -64,7 +64,7 @@ public class PostController {
     // BLOG003: 게시글 작성 요청
     @PostMapping("{blogId}")
     public String PostBlog(@RequestBody PostRequestDto requestDto, @PathVariable Long blogId)
-        throws JsonProcessingException {
+            throws JsonProcessingException {
 
         // 1. Post 저장
         Post post = postService.save(requestDto, blogId);
@@ -84,14 +84,14 @@ public class PostController {
     // BLOG004: 게시글 수정 요청
     @PatchMapping("{postId}")
     public String EditBlog(@PathVariable String postId, @RequestBody PostUpdateDto updateDto)
-        throws JsonProcessingException {
+            throws JsonProcessingException {
 
         return postService.UpdatePost(postId, updateDto);
     }
 
     // BLOG005: 게시글 삭제 요청
     @DeleteMapping("delete/{id}")
-    public String deletePost(@PathVariable String id){
+    public String deletePost(@PathVariable String id) {
         return postService.deletePost(id);
     }
 
@@ -112,7 +112,7 @@ public class PostController {
     @Operation(summary = "내가 구독하는 블로그 (구독 페이지) - Post 미리보기에서 내가 구독한 사용자 Post 조회 요청", description = "Open Feign을 통해 사용되는 API입니다.")
     @PostMapping("preview/subscriptions")
     public PostItemSlice findPreviewByBlogIds(@RequestBody List<Long> blogIdList,
-        @RequestParam int page) {
+            @RequestParam int page) {
 
         return postService.findPreviewList(blogIdList, page);
     }
@@ -120,7 +120,7 @@ public class PostController {
     @PostMapping("preview/subscribers")
     @Operation(summary = "나를 구독하는 블로그 (구독 페이지) - Post 미리보기에서 나를 구독한 사용자 포스트 조회 요청", description = "Open Feign을 통해 사용되는 API입니다.")
     public PostItemSlice findPreviewByMemberIds(@RequestBody List<Long> memberIdList,
-        @RequestParam int page) {
+            @RequestParam int page) {
 
         return postService.findPreviewsByMember(memberIdList, page);
 
@@ -144,12 +144,12 @@ public class PostController {
 
     @Operation(summary = "내 블로그 전체글 - 블로그의 포스트를 페이징 조회합니다", description = "Post를 최신순 7개씩 반환합니다.")
     @Parameters({
-        @Parameter(name = "blogId", description = "블로그의 Id, Path Variable입니다.", required = true, in = ParameterIn.PATH),
-        @Parameter(name = "page", description = "페이지 번호, Query String입니다.", required = true, in = ParameterIn.QUERY)
+            @Parameter(name = "blogId", description = "블로그의 Id, Path Variable입니다.", required = true, in = ParameterIn.PATH),
+            @Parameter(name = "page", description = "페이지 번호, Query String입니다.", required = true, in = ParameterIn.QUERY)
     })
     @GetMapping("blogs/{blogId}/stories")
     public PreviewResponse.StoryItem getStories(@PathVariable Long blogId,
-        @RequestParam(value = "page", defaultValue = "0") int page) {
+            @RequestParam(value = "page", defaultValue = "0") int page) {
 
         return postService.findStories(blogId, page);
     }
@@ -163,14 +163,14 @@ public class PostController {
 
     @Operation(summary = "검색 페이지 - Post 검색을 요청합니다.", description = "Post의 title, content, hashtagName을 기반으로 검색을 진행합니다.")
     @Parameters({
-        @Parameter(name = "keyword", description = "keyword는 검색어이며, QueryString 입니다.", required = true, example = "예시", in = ParameterIn.QUERY),
-        @Parameter(name = "page", description = "page : 페이지 번호, Query String입니다.", in = ParameterIn.QUERY),
-        @Parameter(name = "size", description = "size : 페이지 크기, Query String입니다.", in = ParameterIn.QUERY)
+            @Parameter(name = "keyword", description = "keyword는 검색어이며, QueryString 입니다.", required = true, example = "예시", in = ParameterIn.QUERY),
+            @Parameter(name = "page", description = "page : 페이지 번호, Query String입니다.", in = ParameterIn.QUERY),
+            @Parameter(name = "size", description = "size : 페이지 크기, Query String입니다.", in = ParameterIn.QUERY)
     })
     @GetMapping("search")
     public SearchResponse.SearchInfo searchElastic(@RequestParam String keyword,
-        @RequestParam(value = "page", defaultValue = "0") int page,
-        @RequestParam(value = "size", defaultValue = "10") int size) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size);
         return postService.searchPost(keyword, pageRequest);
