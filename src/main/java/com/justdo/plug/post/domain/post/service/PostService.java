@@ -84,7 +84,6 @@ public class PostService {
         Post save = postRepository.save(post);
         savePostIndex(post);
 
-        System.out.println("ESId" + post.getEsId());
         return save;
     }
 
@@ -226,7 +225,6 @@ public class PostService {
             HttpResponse<String> response = client.send(request,
                 HttpResponse.BodyHandlers.ofString());
             String responseBody = response.body();
-            System.out.println(responseBody);
 
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(responseBody);
@@ -251,9 +249,6 @@ public class PostService {
             .collect(Collectors.toList());
         List<Long> newPostSearchDTOListPostId = postSearchDTOListPostId.stream().distinct()
             .collect(Collectors.toList());
-
-        System.out.println("postSearchDTOListBlogId = " + newPostSearchDTOListBlogId);
-        System.out.println("postSearchDTOListPostId = " + newPostSearchDTOListPostId);
 
         return postSearchDTOList;
     }
