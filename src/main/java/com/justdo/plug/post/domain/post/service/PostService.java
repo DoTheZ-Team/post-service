@@ -71,8 +71,7 @@ public class PostService {
     // BLOG001: 게시글 리스트 조회
     public List<Post> getAllPosts() {
 
-        //return postRepository.findAll();
-        return null;
+        return postRepository.findAll();
 
     }
 
@@ -389,13 +388,13 @@ public class PostService {
         String content = updateDto.getContent();
         String preview = parseContent(content);
 
-        /*
+
         Post post = postRepository.findByEsId(id)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
         post.setContent(updateDto.getContent());
         post.setPreview(preview);
         post.setTitle(updateDto.getTitle());
-         */
+
 
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonBody;
@@ -445,4 +444,11 @@ public class PostService {
         }
 
     }
+
+    @Transactional
+    public void getLiked(Long postId){
+        postRepository.increaseLikeCount(postId);
+    }
+
+
 }
