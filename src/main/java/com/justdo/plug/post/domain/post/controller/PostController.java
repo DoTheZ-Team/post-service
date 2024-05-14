@@ -2,6 +2,7 @@ package com.justdo.plug.post.domain.post.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.justdo.plug.post.domain.category.service.CategoryService;
+import com.justdo.plug.post.domain.liked.service.LikedService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
@@ -43,6 +44,7 @@ public class PostController {
     private final PostService postService;
     private final CategoryService categoryService;
     private final PhotoService photoService;
+    private final LikedService likeService;
 
 
     // BLOG001: 게시글 리스트 조회 요청
@@ -167,6 +169,7 @@ public class PostController {
             @Parameter(name = "page", description = "page : 페이지 번호, Query String입니다.", in = ParameterIn.QUERY),
             @Parameter(name = "size", description = "size : 페이지 크기, Query String입니다.", in = ParameterIn.QUERY)
     })
+
     @GetMapping("search")
     public SearchResponse.SearchInfo searchElastic(@RequestParam String keyword,
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -174,5 +177,21 @@ public class PostController {
 
         PageRequest pageRequest = PageRequest.of(page, size);
         return postService.searchPost(keyword, pageRequest);
+    }
+
+    // 게시글 좋아요 등록
+    @PostMapping("like/{postId}/{memberId}")
+    public String LikePost(@PathVariable Long postId, @PathVariable Long memberId){
+
+        return likeService.postLike(postId, memberId);
+
+    }
+
+    // 게시글 좋아요 취소
+    @DeleteMapping("like/delete/{postId}/{memberId}")
+    public String LikeCancelPost(@PathVariable Long postId, @PathVariable Long memberId){
+
+        return likeService.postLikeCancel(postId, memberId);
+
     }
 }
