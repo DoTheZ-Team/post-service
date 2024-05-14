@@ -188,7 +188,7 @@ public class PostController {
     }
 
     // 게시글 좋아요 취소
-    @DeleteMapping("like/Delete/{postId}/{memberId}")
+    @DeleteMapping("like/delete/{postId}/{memberId}")
     public String LikeCancelPost(@PathVariable Long postId, @PathVariable Long memberId){
 
         return likeService.postLikeCancel(postId, memberId);
