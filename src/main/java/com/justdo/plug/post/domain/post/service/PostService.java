@@ -1,10 +1,13 @@
 package com.justdo.plug.post.domain.post.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.blog.BlogClient;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
+import com.justdo.plug.post.domain.photo.Photo;
+import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
@@ -21,6 +24,7 @@ import com.justdo.plug.post.domain.post.dto.SearchResponse.PostSearchItem;
 import com.justdo.plug.post.domain.post.dto.SearchResponse.SearchInfo;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
+import com.justdo.plug.post.domain.posthashtag.repository.PostHashtagRepository;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.elastic.PostDocument;
 import com.justdo.plug.post.elastic.PostElasticsearchRepository;
@@ -33,10 +37,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,7 +52,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional(readOnly = false)
 @RequiredArgsConstructor
 public class PostService {
 
@@ -60,6 +62,8 @@ public class PostService {
     private final PostElasticsearchRepository postElasticsearchRepository;
     private final PhotoService photoService;
     private final BlogClient blogClient;
+    private final PostHashtagRepository postHashtagRepository;
+    private final PhotoRepository photoRepository;
 
 
     @Value("${spring.elasticsearch.uris}")
@@ -307,21 +311,23 @@ public class PostService {
 
         // MySQL
         // EsId 값으로 Post를 찾기
-        /*
+
         Post post = postRepository.findByEsId(id)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
         Long postId = post.getId();
+        System.out.println("postId = " + postId);
         List<PostHashtag> postHashtags = postHashtagRepository.findByPostId(postId);
         postHashtagRepository.deleteAll(postHashtags);
 
-        List<Photo> photos = photoRepository.findByPostId(postId);
-        photoRepository.deleteAll(photos);
+        Optional<Photo> photos = photoRepository.findFirstByPostId(postId);
+        photos.ifPresent(photoRepository::delete);
+
 
         // 찾은 Post 삭제
-        postRepository.delete(post);
+        postRepository.deleteByEsId(id);
 
-         */
+
 
         // Elasticsearch
         String deleteUrl = url + "/post/_doc/" + URLEncoder.encode(id, StandardCharsets.UTF_8);

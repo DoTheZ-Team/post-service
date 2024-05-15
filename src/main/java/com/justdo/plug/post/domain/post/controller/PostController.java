@@ -84,15 +84,15 @@ public class PostController {
     }
 
     // BLOG004: 게시글 수정 요청
-    @PatchMapping("{postId}")
-    public String EditBlog(@PathVariable String postId, @RequestBody PostUpdateDto updateDto)
+    @PatchMapping("{esId}")
+    public String EditBlog(@PathVariable String esId, @RequestBody PostUpdateDto updateDto)
             throws JsonProcessingException {
 
-        return postService.UpdatePost(postId, updateDto);
+        return postService.UpdatePost(esId, updateDto);
     }
 
     // BLOG005: 게시글 삭제 요청
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("esId/{id}")
     public String deletePost(@PathVariable String id) {
         return postService.deletePost(id);
     }
