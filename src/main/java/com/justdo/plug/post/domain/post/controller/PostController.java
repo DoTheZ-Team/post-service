@@ -15,12 +15,15 @@ import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
 import com.justdo.plug.post.domain.post.dto.SearchResponse;
 import com.justdo.plug.post.domain.post.service.PostService;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
+import com.justdo.plug.post.global.utils.JwtProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.data.domain.PageRequest;
@@ -45,6 +48,7 @@ public class PostController {
     private final CategoryService categoryService;
     private final PhotoService photoService;
     private final LikesService likeService;
+    private final JwtProvider jwtProvider;
 
 
     // BLOG001: 게시글 리스트 조회 요청
@@ -69,8 +73,11 @@ public class PostController {
     // BLOG003: 게시글 작성 요청
     @PostMapping("{blogId}")
     @Operation(summary = "게시글 작성 요청", description = "")
-    public String PostBlog(@RequestBody PostRequestDto requestDto, @PathVariable Long blogId)
+    public String PostBlog(HttpServletRequest request, @RequestBody PostRequestDto requestDto, @PathVariable Long blogId)
             throws JsonProcessingException {
+
+        Long memberId = jwtProvider.getUserIdFromToken(request);
+        requestDto.setMemberId(memberId);
 
         // 1. Post 저장
         Post post = postService.save(requestDto, blogId);
@@ -104,8 +111,11 @@ public class PostController {
     }
 
     // BlOG007: 특정 멤버가 사용한 HASHTAG 값 조회
+    // Recommend service에서 사용예정이라 따로 JWT 파싱 진행 안함
     @GetMapping("memberId/{memberId}")
+    @Operation(summary = "특정 멤버가 사용한 HASHTAG 값 조회", description = "Open Feign을 통해 사용되는 API입니다.")
     public List<String> ViewHashtags(@PathVariable Long memberId) {
+
         return postHashtagService.getHashtags(memberId);
     }
 
@@ -187,19 +197,22 @@ public class PostController {
     }
 
     // 게시글 좋아요 등록
-    @PostMapping("like/{postId}/{memberId}")
+    @PostMapping("like/{postId}")
     @Operation(summary = "특정게시글 좋아요 요창", description = "memberId는 JWT토큰 파싱 예정")
-    public String LikePost(@PathVariable Long postId, @PathVariable Long memberId){
+    public String LikePost(@PathVariable Long postId, HttpServletRequest request){
 
+
+        Long memberId = jwtProvider.getUserIdFromToken(request);
         return likeService.postLike(postId, memberId);
 
     }
 
     // 게시글 좋아요 취소
-    @DeleteMapping("like/delete/{postId}/{memberId}")
+    @DeleteMapping("like/cancel/{postId}")
     @Operation(summary = "특정게시글 좋아요 취소 요청", description = "memberId는 JWT토큰 파싱 예정")
-    public String LikeCancelPost(@PathVariable Long postId, @PathVariable Long memberId){
+    public String LikeCancelPost(@PathVariable Long postId, HttpServletRequest request){
 
+        Long memberId = jwtProvider.getUserIdFromToken(request);
         return likeService.postLikeCancel(postId, memberId);
 
     }

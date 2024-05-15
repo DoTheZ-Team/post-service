@@ -1,6 +1,5 @@
 package com.justdo.plug.post.domain.post.dto;
 
-import com.justdo.plug.post.domain.post.Post;
 import lombok.Builder;
 import lombok.Data;
 

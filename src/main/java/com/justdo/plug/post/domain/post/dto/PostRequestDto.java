@@ -27,4 +27,9 @@ public class PostRequestDto {
             .preview(preview)
             .build();
     }
+
+    public void setMemberId(Long memberId) {
+        this.memberId = memberId;
+    }
+
 }
