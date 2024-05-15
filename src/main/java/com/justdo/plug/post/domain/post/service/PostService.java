@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.blog.BlogClient;
+import com.justdo.plug.post.domain.category.Category;
+import com.justdo.plug.post.domain.category.repository.CategoryRepository;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.photo.Photo;
 import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
@@ -52,7 +54,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = false)
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PostService {
 
@@ -64,6 +66,7 @@ public class PostService {
     private final BlogClient blogClient;
     private final PostHashtagRepository postHashtagRepository;
     private final PhotoRepository photoRepository;
+    private final CategoryRepository categoryRepository;
 
 
     @Value("${spring.elasticsearch.uris}")
@@ -307,12 +310,13 @@ public class PostService {
         return document.getId();
     }
 
-    public String deletePost(String id) {
+    @Transactional
+    public String deletePost(String esId) {
 
         // MySQL
         // EsId 값으로 Post를 찾기
 
-        Post post = postRepository.findByEsId(id)
+        Post post = postRepository.findByEsId(esId)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
         Long postId = post.getId();
@@ -320,17 +324,19 @@ public class PostService {
         List<PostHashtag> postHashtags = postHashtagRepository.findByPostId(postId);
         postHashtagRepository.deleteAll(postHashtags);
 
-        Optional<Photo> photos = photoRepository.findFirstByPostId(postId);
-        photos.ifPresent(photoRepository::delete);
+        List<Photo> photos = photoRepository.findAllByPostId(postId);
+        if (photos != null && !photos.isEmpty()) {
+            photoRepository.deleteAll(photos);
+        }
 
 
         // 찾은 Post 삭제
-        postRepository.deleteByEsId(id);
+        postRepository.deleteByEsId(esId);
 
 
 
         // Elasticsearch
-        String deleteUrl = url + "/post/_doc/" + URLEncoder.encode(id, StandardCharsets.UTF_8);
+        String deleteUrl = url + "/post/_doc/" + URLEncoder.encode(esId, StandardCharsets.UTF_8);
 
         HttpRequest deleteRequest = HttpRequest.newBuilder()
             .uri(URI.create(deleteUrl))
@@ -389,6 +395,7 @@ public class PostService {
         return PreviewResponse.toStoryItem(posts, photoUrlList);
     }
 
+    @Transactional
     public String UpdatePost(String id, PostUpdateDto updateDto) throws JsonProcessingException {
 
         String content = updateDto.getContent();
@@ -397,6 +404,23 @@ public class PostService {
 
         Post post = postRepository.findByEsId(id)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
+        Long postId = post.getId();
+
+        // 카테고리 변경
+        Category category = categoryRepository.findById(postId)
+                .orElseThrow(() -> new ApiException(ErrorStatus._CATEGORY_NOT_FOUND));
+        category.changeName(updateDto.getCategoryName());
+
+        // 이미지 경로 변경
+        // TODO: 이미지를 새로 추가했을때 혹은 삭제했을때 생성,삭제 로직 구현하기
+        for (String photoUrl : updateDto.getPhotoUrl()) {
+            List<Photo> photos = photoRepository.findAllByPostId(postId);
+            for (Photo photo : photos) {
+                photo.changePhotoUrl(photoUrl);
+            }
+        }
+
+        // 내용, 제목, 프리뷰 변경
         post.changeContent(updateDto.getContent());
         post.changeTitle(preview);
         post.changePreview(updateDto.getTitle());

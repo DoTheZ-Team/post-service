@@ -64,6 +64,7 @@ public class Post extends BaseTimeEntity {
         this.title = title;
     }
 
+
     public void changePreview(String preview) {
         this.preview = preview;
     }

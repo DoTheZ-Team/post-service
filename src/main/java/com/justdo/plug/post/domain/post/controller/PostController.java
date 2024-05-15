@@ -104,10 +104,10 @@ public class PostController {
     }
 
     // BLOG005: 게시글 삭제 요청
-    @DeleteMapping("esId/{id}")
+    @DeleteMapping("{esId}")
     @Operation(summary = "특정게시글 삭제 요청", description = "elastic search id로 요청")
-    public String deletePost(@PathVariable String id) {
-        return postService.deletePost(id);
+    public String deletePost(@PathVariable String esId) {
+        return postService.deletePost(esId);
     }
 
     // BlOG007: 특정 멤버가 사용한 HASHTAG 값 조회
@@ -149,7 +149,7 @@ public class PostController {
      */
     @Operation(summary = "내 블로그 - 최신 Post 4개 조회 요청", description = "Open Feign을 통해 사용되는 API입니다.")
     @Parameter(name = "blogId", description = "블로그의 Id, Path Variable입니다.", required = true, in = ParameterIn.PATH)
-    @GetMapping("blogs/{blogId}")
+    @GetMapping("hashtags/{blogId}")
     public BlogPostItem findBlogPosts(@PathVariable Long blogId) {
 
         List<Post> recent4Post = postService.getRecent4Post(blogId);
