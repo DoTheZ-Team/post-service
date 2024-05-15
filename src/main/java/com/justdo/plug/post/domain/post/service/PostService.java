@@ -97,7 +97,7 @@ public class PostService {
         Post save = postRepository.save(post);
 
         String esId = savePostIndex(save);
-        post.setEsId(esId);
+        post.changeEsId(esId);
 
         System.out.println(post.getEsId());
         return save;
@@ -397,9 +397,9 @@ public class PostService {
 
         Post post = postRepository.findByEsId(id)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
-        post.setContent(updateDto.getContent());
-        post.setPreview(preview);
-        post.setTitle(updateDto.getTitle());
+        post.changeContent(updateDto.getContent());
+        post.changeTitle(preview);
+        post.changePreview(updateDto.getTitle());
 
 
         ObjectMapper objectMapper = new ObjectMapper();

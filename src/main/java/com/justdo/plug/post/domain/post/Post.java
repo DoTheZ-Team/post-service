@@ -14,9 +14,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Setter
 public class Post extends BaseTimeEntity {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +29,7 @@ public class Post extends BaseTimeEntity {
 
     @Column(nullable = false)
     @Builder.Default
-    private int like_count = 0;
+    private int likeCount = 0;
 
     @Column(nullable = false)
     @Builder.Default
@@ -53,8 +51,20 @@ public class Post extends BaseTimeEntity {
     @Column
     private String esId;
 
-    public void setEsId(String esId) {
+    // 필드 값 변경을 위한 메서드
+    public void changeEsId(String esId) {
         this.esId = esId;
     }
 
+    public void changeContent(String content) {
+        this.content = content;
+    }
+
+    public void changeTitle(String title) {
+        this.title = title;
+    }
+
+    public void changePreview(String preview) {
+        this.preview = preview;
+    }
 }
