@@ -31,7 +31,7 @@ public class PostResponseDto {
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(array)
-                .likeCount(post.getLike_count())
+                .likeCount(post.getLikeCount())
                 .temporaryState(post.isTemporaryState())
                 .state(post.isState())
                 .created_at(post.getCreatedAt())
