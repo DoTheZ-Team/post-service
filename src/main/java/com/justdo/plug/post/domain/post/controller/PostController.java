@@ -49,6 +49,8 @@ public class PostController {
 
     // BLOG001: 게시글 리스트 조회 요청
     @GetMapping
+    @Operation(summary = "모든 게시글 리스트 조회 요청", description = "")
+
     public List<Post> ViewList() {
 
         return postService.getAllPosts();
@@ -57,6 +59,7 @@ public class PostController {
 
     // BLOG002: 게시글 상세페이지 조회 요청
     @GetMapping("{postId}")
+    @Operation(summary = "특정 게시글 상세페이지 조회 요청", description = "")
     public PostResponseDto ViewPage(@PathVariable Long postId) throws JSONException {
 
         return postService.getPostById(postId);
@@ -65,6 +68,7 @@ public class PostController {
 
     // BLOG003: 게시글 작성 요청
     @PostMapping("{blogId}")
+    @Operation(summary = "게시글 작성 요청", description = "")
     public String PostBlog(@RequestBody PostRequestDto requestDto, @PathVariable Long blogId)
             throws JsonProcessingException {
 
@@ -85,6 +89,7 @@ public class PostController {
 
     // BLOG004: 게시글 수정 요청
     @PatchMapping("{esId}")
+    @Operation(summary = "특정게시글 수정 요청", description = "elastic search id로 요청")
     public String EditBlog(@PathVariable String esId, @RequestBody PostUpdateDto updateDto)
             throws JsonProcessingException {
 
@@ -93,6 +98,7 @@ public class PostController {
 
     // BLOG005: 게시글 삭제 요청
     @DeleteMapping("esId/{id}")
+    @Operation(summary = "특정게시글 삭제 요청", description = "elastic search id로 요청")
     public String deletePost(@PathVariable String id) {
         return postService.deletePost(id);
     }
@@ -158,6 +164,7 @@ public class PostController {
 
     // BLOG009: 블로그 아이디로 해시태그 추출하기
     @GetMapping("blogId/{blogId}")
+    @Operation(summary = "블로그 아이디로 해시태그 추출하기", description = "Open Feign을 통해 사용되는 API입니다.")
     public List<String> ViewHashtagsBlog(@PathVariable Long blogId) {
         return postHashtagService.getHashtagsBlog(blogId);
 
@@ -181,6 +188,7 @@ public class PostController {
 
     // 게시글 좋아요 등록
     @PostMapping("like/{postId}/{memberId}")
+    @Operation(summary = "특정게시글 좋아요 요창", description = "memberId는 JWT토큰 파싱 예정")
     public String LikePost(@PathVariable Long postId, @PathVariable Long memberId){
 
         return likeService.postLike(postId, memberId);
@@ -189,6 +197,7 @@ public class PostController {
 
     // 게시글 좋아요 취소
     @DeleteMapping("like/delete/{postId}/{memberId}")
+    @Operation(summary = "특정게시글 좋아요 취소 요청", description = "memberId는 JWT토큰 파싱 예정")
     public String LikeCancelPost(@PathVariable Long postId, @PathVariable Long memberId){
 
         return likeService.postLikeCancel(postId, memberId);
