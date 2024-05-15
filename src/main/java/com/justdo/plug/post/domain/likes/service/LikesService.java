@@ -1,27 +1,27 @@
-package com.justdo.plug.post.domain.liked.service;
+package com.justdo.plug.post.domain.likes.service;
 
-import com.justdo.plug.post.domain.liked.Liked;
-import com.justdo.plug.post.domain.liked.repository.LikedRepository;
+import com.justdo.plug.post.domain.likes.Likes;
+import com.justdo.plug.post.domain.likes.repository.LikesRepository;
 import com.justdo.plug.post.domain.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class LikedService {
-    private final LikedRepository likeRepository;
+public class LikesService {
+    private final LikesRepository likeRepository;
     private final PostService postService;
 
     // 좋아요 등록
     public String postLike(Long postId, Long memberId) {
         try {
 
-            Liked liked = Liked.builder()
+            Likes likes = Likes.builder()
                     .postId(postId)
                     .memberId(memberId)
                     .build();
 
-            likeRepository.save(liked);
+            likeRepository.save(likes);
             postService.getLiked(postId); // 포스트에 좋아요 추가
 
             return "게시물 좋아요가 성공적으로 등록되었습니다.";
@@ -33,7 +33,7 @@ public class LikedService {
 
     // 좋아요 취소
     public String postLikeCancel(Long postId, Long memberId) {
-        Liked likepost = likeRepository.findByPostIdAndMemberId(postId, memberId);
+        Likes likepost = likeRepository.findByPostIdAndMemberId(postId, memberId);
 
         try {
             likeRepository.delete(likepost);

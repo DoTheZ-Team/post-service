@@ -2,7 +2,7 @@ package com.justdo.plug.post.domain.post.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.justdo.plug.post.domain.category.service.CategoryService;
-import com.justdo.plug.post.domain.liked.service.LikedService;
+import com.justdo.plug.post.domain.likes.service.LikesService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
@@ -44,7 +44,7 @@ public class PostController {
     private final PostService postService;
     private final CategoryService categoryService;
     private final PhotoService photoService;
-    private final LikedService likeService;
+    private final LikesService likeService;
 
 
     // BLOG001: 게시글 리스트 조회 요청
