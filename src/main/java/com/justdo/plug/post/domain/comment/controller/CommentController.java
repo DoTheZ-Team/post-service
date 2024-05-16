@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +30,7 @@ public class CommentController {
     @Parameter(name = "postId", description = "포스트의 Id, Path Variable입니다.", required = true, in = ParameterIn.PATH)
     @PostMapping("/{postId}")
     public ApiResponse<CommentProc> post(HttpServletRequest request, @RequestBody
-            CommentRequest.PostComment post, @PathVariable Long postId) {
+    CommentRequest.PostComment post, @PathVariable Long postId) {
 
         // TODO: JwtProvider 추가 후 수정
         Long memberId = 1L;
@@ -37,4 +38,15 @@ public class CommentController {
 
         return ApiResponse.onSuccess(commentService.writeComment(commentVO));
     }
+
+    @Operation(summary = "댓글 페이지 - 게시글에 댓글 수정 API", description = "Post의 Comment를 수정합니다.")
+    @Parameter(name = "commentId", description = "댓글의 Id, Path Variable입니다.", required = true, in = ParameterIn.PATH)
+    @PatchMapping("/{commentId}")
+    public ApiResponse<CommentProc> patch(HttpServletRequest request, @PathVariable Long commentId,
+            @RequestBody String content) {
+
+        return ApiResponse.onSuccess(commentService.patchComment(commentId, content));
+    }
+
+
 }

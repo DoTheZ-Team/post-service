@@ -54,4 +54,17 @@ public class CommentService {
         return parentComment;
     }
 
+    @Transactional
+    public CommentProc patchComment(Long commentId, String content) {
+        Comment comment = getComment(commentId);
+        comment.update(content);
+        return CommentResponse.toCommentProc(comment);
+    }
+
+    public Comment getComment(Long commentId) {
+        return commentRepository.findById(commentId).orElseThrow(
+                () -> new ApiException(ErrorStatus._COMMENT_NOT_FOUND)
+        );
+    }
+
 }
