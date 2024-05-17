@@ -1,5 +1,6 @@
 package com.justdo.plug.post.domain.blog;
 
+import com.justdo.plug.post.domain.blog.BlogDto.BlogInfo;
 import com.justdo.plug.post.domain.post.dto.SearchResponse.BlogInfoItem;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -13,4 +14,7 @@ public interface BlogClient {
     @PostMapping("/search")
     BlogInfoItem findBlogInfoItem(@RequestBody List<Long> blogIdList,
         @RequestParam(value = "page", defaultValue = "0") int page);
+
+    @PostMapping("/comments")
+    List<BlogInfo> findBlogInfoToComment(@RequestBody List<Long> memberIdList);
 }
