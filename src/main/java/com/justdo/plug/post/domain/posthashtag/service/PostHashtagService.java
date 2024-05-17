@@ -30,6 +30,7 @@ public class PostHashtagService {
     @Transactional
     public void createHashtag(List<String> hashtags, Post post) {
 
+        System.out.println(hashtags);
         Optional.ofNullable(hashtags)
             .ifPresent(list -> list.forEach(hashtag -> {
 
@@ -42,6 +43,20 @@ public class PostHashtagService {
                 // Post_Hashtag 엔티티 저장
                 save(postHashtag);
             }));
+    }
+
+    @Transactional
+    public void changeHashtag(List<String> newHashtags, Post post) {
+        postHashtagRepository.deleteByPost(post);
+
+        newHashtags.forEach(hashtagName -> {
+
+            Hashtag hashtag = hashtagService.getHashtagIdByName(hashtagName);
+
+            PostHashtag postHashtag = new PostHashtag(post, hashtag);
+
+            postHashtagRepository.save(postHashtag);
+        });
     }
 
     // BLOG009: 블로그 아이디로 해시태그 추출하기
@@ -130,5 +145,10 @@ public class PostHashtagService {
             .map(ph -> hashtagService.getHashtagNameById(ph.getHashtag().getId()))
             .distinct()
             .toList();
+    }
+
+    public void deletePostHashtags(Long postId) {
+        List<PostHashtag> postHashtags = postHashtagRepository.findByPostId(postId);
+        postHashtagRepository.deleteAll(postHashtags);
     }
 }

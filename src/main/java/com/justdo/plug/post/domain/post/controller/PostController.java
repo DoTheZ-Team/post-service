@@ -77,10 +77,9 @@ public class PostController {
             throws JsonProcessingException {
 
         Long memberId = jwtProvider.getUserIdFromToken(request);
-        requestDto.setMemberId(memberId);
 
         // 1. Post 저장
-        Post post = postService.save(requestDto, blogId);
+        Post post = postService.save(requestDto, blogId, memberId);
 
         // 2. Post_Hashtag 저장
         postHashtagService.createHashtag(requestDto.getHashtags(), post);
@@ -149,7 +148,7 @@ public class PostController {
      */
     @Operation(summary = "내 블로그 - 최신 Post 4개 조회 요청", description = "Open Feign을 통해 사용되는 API입니다.")
     @Parameter(name = "blogId", description = "블로그의 Id, Path Variable입니다.", required = true, in = ParameterIn.PATH)
-    @GetMapping("hashtags/{blogId}")
+    @GetMapping("blogs/{blogId}")
     public BlogPostItem findBlogPosts(@PathVariable Long blogId) {
 
         List<Post> recent4Post = postService.getRecent4Post(blogId);
@@ -208,7 +207,7 @@ public class PostController {
     }
 
     // 게시글 좋아요 취소
-    @DeleteMapping("like/cancel/{postId}")
+    @DeleteMapping("like/{postId}")
     @Operation(summary = "특정게시글 좋아요 취소 요청", description = "memberId는 JWT토큰 파싱 예정")
     public String LikeCancelPost(@PathVariable Long postId, HttpServletRequest request){
 

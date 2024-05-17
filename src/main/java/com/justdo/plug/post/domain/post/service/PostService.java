@@ -8,6 +8,8 @@ import com.justdo.plug.post.domain.blog.BlogClient;
 import com.justdo.plug.post.domain.category.Category;
 import com.justdo.plug.post.domain.category.repository.CategoryRepository;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
+import com.justdo.plug.post.domain.likes.Likes;
+import com.justdo.plug.post.domain.likes.repository.LikesRepository;
 import com.justdo.plug.post.domain.photo.Photo;
 import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
@@ -67,6 +69,7 @@ public class PostService {
     private final PostHashtagRepository postHashtagRepository;
     private final PhotoRepository photoRepository;
     private final CategoryRepository categoryRepository;
+    private final LikesRepository likesRepository;
 
 
     @Value("${spring.elasticsearch.uris}")
@@ -92,17 +95,17 @@ public class PostService {
 
     // BLOG003: 블로그 작성
     @Transactional
-    public Post save(PostRequestDto requestDto, Long blogId) throws JsonProcessingException {
+    public Post save(PostRequestDto requestDto, Long blogId, Long memberId) throws JsonProcessingException {
 
         String preview = parseContent(requestDto.getContent());
 
-        Post post = requestDto.toEntity(requestDto, preview, blogId);
+        Post post = requestDto.toEntity(requestDto, preview, blogId, memberId);
         Post save = postRepository.save(post);
+
 
         String esId = savePostIndex(save);
         post.changeEsId(esId);
 
-        System.out.println(post.getEsId());
         return save;
     }
 
@@ -320,15 +323,16 @@ public class PostService {
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
         Long postId = post.getId();
-        System.out.println("postId = " + postId);
-        List<PostHashtag> postHashtags = postHashtagRepository.findByPostId(postId);
-        postHashtagRepository.deleteAll(postHashtags);
+        postHashtagService.deletePostHashtags(postId);
 
         List<Photo> photos = photoRepository.findAllByPostId(postId);
         if (photos != null && !photos.isEmpty()) {
             photoRepository.deleteAll(photos);
         }
 
+        categoryRepository.deleteByPost(post);
+
+        likesRepository.deleteByPostId(postId);
 
         // 찾은 Post 삭제
         postRepository.deleteByEsId(esId);
@@ -405,25 +409,24 @@ public class PostService {
         Post post = postRepository.findByEsId(id)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
         Long postId = post.getId();
+        System.out.println("postId = " + postId);
 
         // 카테고리 변경
-        Category category = categoryRepository.findById(postId)
+        Category category = categoryRepository.findByPostId(postId)
                 .orElseThrow(() -> new ApiException(ErrorStatus._CATEGORY_NOT_FOUND));
         category.changeName(updateDto.getCategoryName());
 
+        // 해시태그 변경
+        List<String> hashtags = updateDto.getHashtags();
+        postHashtagService.changeHashtag(hashtags, post);
+
         // 이미지 경로 변경
-        // TODO: 이미지를 새로 추가했을때 혹은 삭제했을때 생성,삭제 로직 구현하기
-        for (String photoUrl : updateDto.getPhotoUrl()) {
-            List<Photo> photos = photoRepository.findAllByPostId(postId);
-            for (Photo photo : photos) {
-                photo.changePhotoUrl(photoUrl);
-            }
-        }
+        photoService.updatePhotoUrls(postId, updateDto);
 
         // 내용, 제목, 프리뷰 변경
         post.changeContent(updateDto.getContent());
-        post.changeTitle(preview);
-        post.changePreview(updateDto.getTitle());
+        post.changeTitle(updateDto.getTitle());
+        post.changePreview(preview);
 
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -434,7 +437,7 @@ public class PostService {
             docFields.put("content", updateDto.getContent());
             docFields.put("hashtags", updateDto.getHashtags());
             docFields.put("categoryName", updateDto.getCategoryName());
-            docFields.put("photoUrl", updateDto.getPhotoUrl());
+            docFields.put("photoUrl", updateDto.getPhotoUrls());
             docFields.put("preview", preview);
 
             // "doc" 필드 아래에 updateDto 객체를 넣어서 JSON 문자열로 변환

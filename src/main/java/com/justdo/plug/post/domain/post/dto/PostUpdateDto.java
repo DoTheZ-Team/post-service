@@ -12,6 +12,6 @@ public class PostUpdateDto {
     private String content;
     private List<String> hashtags;
     private String categoryName;
-    private List<String> photoUrl;
+    private List<String> photoUrls;
 
 }
