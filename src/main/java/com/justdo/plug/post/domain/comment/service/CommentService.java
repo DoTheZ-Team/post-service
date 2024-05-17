@@ -1,16 +1,22 @@
 package com.justdo.plug.post.domain.comment.service;
 
+import com.justdo.plug.post.domain.blog.BlogClient;
+import com.justdo.plug.post.domain.blog.BlogDto.BlogInfo;
 import com.justdo.plug.post.domain.comment.Comment;
 import com.justdo.plug.post.domain.comment.dto.CommentRequest;
 import com.justdo.plug.post.domain.comment.dto.CommentResponse;
 import com.justdo.plug.post.domain.comment.dto.CommentResponse.CommentProc;
+import com.justdo.plug.post.domain.comment.dto.CommentResponse.CommentResult;
 import com.justdo.plug.post.domain.comment.dto.CommentVO;
 import com.justdo.plug.post.domain.comment.repository.CommentRepository;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.service.PostService;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +27,7 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final PostService postService;
+    private final BlogClient blogClient;
 
     @Transactional
     public CommentProc writeComment(CommentVO commentVO) {
@@ -67,4 +74,46 @@ public class CommentService {
         );
     }
 
+    @Transactional
+    public CommentProc deleteComment(Long commentId) {
+        Comment comment = getComment(commentId);
+        commentRepository.delete(comment);
+
+        return CommentResponse.toCommentProc(comment);
+    }
+
+    public CommentResult findComments(Long postId, PageRequest pageRequest) {
+
+        Slice<Comment> commentSlice = commentRepository.findAllByPostIdAndParentCommentIsNull(
+                postId, pageRequest);
+
+        List<Long> memberIdList = commentSlice.stream()
+                .map(Comment::getMemberId)
+                .toList();
+        List<BlogInfo> blogInfoList = findBlogInfoList(memberIdList);
+        System.out.println("blogInfoList.size() = " + blogInfoList.size());
+
+        return CommentResponse.toCommentResult(commentSlice, blogInfoList);
+    }
+
+    private List<BlogInfo> findBlogInfoList(List<Long> memberIdList) {
+
+        return blogClient.findBlogInfoToComment(memberIdList);
+    }
+
+    /**
+     * Child Comment 조회
+     */
+    public CommentResult findChildComments(Long commentId, PageRequest pageRequest) {
+
+        Slice<Comment> commentSlice = commentRepository.findAllByParentCommentId(commentId,
+                pageRequest);
+
+        List<Long> memberIdList = commentSlice.stream()
+                .map(Comment::getMemberId)
+                .toList();
+        List<BlogInfo> blogInfoList = findBlogInfoList(memberIdList);
+
+        return CommentResponse.toCommentResult(commentSlice, blogInfoList);
+    }
 }
