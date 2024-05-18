@@ -52,8 +52,7 @@ public class PostController {
 
     // BLOG001: 게시글 리스트 조회 요청
     @GetMapping
-    @Operation(summary = "모든 게시글 리스트 조회 요청", description = "")
-
+    @Operation(summary = "모든 게시글 리스트 조회 요청", description = "서비스내에 있는 모든 게시글 리스트를 조회합니다")
     public ApiResponse<List<Post>> ViewList() {
 
         return ApiResponse.onSuccess(postService.getAllPosts());
@@ -62,7 +61,8 @@ public class PostController {
 
     // BLOG002: 게시글 상세페이지 조회 요청
     @GetMapping("{postId}")
-    @Operation(summary = "특정 게시글 상세페이지 조회 요청", description = "")
+    @Operation(summary = "특정 게시글 상세페이지 조회 요청", description = "특정 게시글의 상세페이지를 요청합니다")
+    @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
     public ApiResponse<PostResponseDto> ViewPage(@PathVariable Long postId) throws JSONException {
 
         return ApiResponse.onSuccess(postService.getPostById(postId));
@@ -71,7 +71,8 @@ public class PostController {
 
     // BLOG003: 게시글 작성 요청
     @PostMapping("{blogId}")
-    @Operation(summary = "게시글 작성 요청", description = "")
+    @Operation(summary = "게시글 작성 요청", description = "해당(본인) 블로그에 게시글을 작성합니다")
+    @Parameter(name = "blogId", description = "사용자 블로그의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
     public ApiResponse<String> PostBlog(HttpServletRequest request,
             @RequestBody PostRequestDto requestDto, @PathVariable Long blogId)
             throws JsonProcessingException {
@@ -95,7 +96,8 @@ public class PostController {
 
     // BLOG004: 게시글 수정 요청
     @PatchMapping("{esId}")
-    @Operation(summary = "특정게시글 수정 요청", description = "elastic search id로 요청")
+    @Operation(summary = "특정게시글 수정 요청", description = "해당 게시글을 수정합니다")
+    @Parameter(name = "esId", description = "포스트의 elasticsearch id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
     public ApiResponse<String> EditBlog(@PathVariable String esId,
             @RequestBody PostUpdateDto updateDto)
             throws JsonProcessingException {
@@ -105,7 +107,8 @@ public class PostController {
 
     // BLOG005: 게시글 삭제 요청
     @DeleteMapping("{esId}")
-    @Operation(summary = "특정게시글 삭제 요청", description = "elastic search id로 요청")
+    @Operation(summary = "특정게시글 삭제 요청", description = "해당 게시글을 삭제합니다")
+    @Parameter(name = "esId", description = "포스트의 elasticsearch id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
     public ApiResponse<String> deletePost(@PathVariable String esId) {
         return ApiResponse.onSuccess(postService.deletePost(esId));
     }
@@ -121,6 +124,8 @@ public class PostController {
 
     // BlOG008: 게시글의 글만 조회하기
     @GetMapping("previews/{postId}")
+    @Operation(summary = "특정게시글의 미리보기(글만) 요청", description = "글 내의 JS 값들을 제외한 글만 조회하는 API입니다")
+    @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
     public ApiResponse<String> PreviewPost(@PathVariable Long postId)
             throws JsonProcessingException {
 
