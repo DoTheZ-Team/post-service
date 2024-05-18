@@ -18,20 +18,13 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Post 게시글 관련 API입니다.")
 @RestController
@@ -97,9 +90,14 @@ public class PostController {
     @PatchMapping("{esId}")
     @Operation(summary = "특정게시글 수정 요청", description = "해당 게시글을 수정합니다")
     @Parameter(name = "esId", description = "포스트의 elasticsearch id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<String> EditBlog(@PathVariable String esId,
+    public ApiResponse<String> EditBlog(HttpServletRequest request, @PathVariable String esId,
             @RequestBody PostUpdateDto updateDto)
             throws JsonProcessingException {
+
+        // 전체 해시태그 Recommend Service 로 보내주기
+        Long memberId = jwtProvider.getUserIdFromToken(request);
+        List<String> hashtags = postHashtagService.getHashtags(memberId);
+        postHashtagService.sendAllHashtags(memberId, hashtags);
 
         return ApiResponse.onSuccess(postService.UpdatePost(esId, updateDto));
     }
@@ -108,7 +106,12 @@ public class PostController {
     @DeleteMapping("{esId}")
     @Operation(summary = "특정게시글 삭제 요청", description = "해당 게시글을 삭제합니다")
     @Parameter(name = "esId", description = "포스트의 elasticsearch id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<String> deletePost(@PathVariable String esId) {
+    public ApiResponse<String> deletePost(HttpServletRequest request, @PathVariable String esId) {
+
+        Long memberId = jwtProvider.getUserIdFromToken(request);
+        List<String> hashtags = postHashtagService.getHashtags(memberId);
+        postHashtagService.sendAllHashtags(memberId, hashtags);
+
         return ApiResponse.onSuccess(postService.deletePost(esId));
     }
 

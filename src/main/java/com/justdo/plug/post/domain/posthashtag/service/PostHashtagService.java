@@ -9,12 +9,13 @@ import com.justdo.plug.post.domain.posthashtag.PostHashtag;
 import com.justdo.plug.post.domain.posthashtag.repository.PostHashtagRepository;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -162,4 +163,16 @@ public class PostHashtagService {
         //TODO: Recommend Service 로 POST API 요청하기
 
     }
+
+    public void sendAllHashtags(Long memberId, List<String> hashtags){
+        HashtagRequestDTO hashtagRequestdto = new HashtagRequestDTO();
+
+        hashtagRequestdto.setHashtags(hashtags);
+        hashtagRequestdto.setMemberId(memberId);
+
+        //TODO: Recommend Service 로 POST API 요청하기
+
+    }
+
+
 }
