@@ -6,6 +6,7 @@ import com.justdo.plug.post.domain.comment.dto.CommentResponse.CommentProc;
 import com.justdo.plug.post.domain.comment.dto.CommentVO;
 import com.justdo.plug.post.domain.comment.service.CommentService;
 import com.justdo.plug.post.global.response.ApiResponse;
+import com.justdo.plug.post.global.utils.JwtProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -32,11 +33,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class CommentController {
 
     private final CommentService commentService;
+    private final JwtProvider jwtProvider;
 
     @Operation(summary = "댓글 조회 페이지 - 게시글에 작성된 부모 댓글 조회 API", description = "Post의 Comment 목록을 조회합니다.")
     @Parameters({
             @Parameter(name = "postId", description = "포스트의 Id, Path Variable입니다.", required = true, in = ParameterIn.PATH),
-            @Parameter(name = "page", description = "페이징 번호 page, Query String입니다.", in = ParameterIn.QUERY),
+            @Parameter(name = "page", description = "페이징 번호 page, Query String입니다.", required = true, in = ParameterIn.QUERY),
             @Parameter(name = "size", description = "페이징 크기 size, Query String입니다.", in = ParameterIn.QUERY)
     })
     @GetMapping("/{postId}")
@@ -49,12 +51,9 @@ public class CommentController {
         return ApiResponse.onSuccess(commentService.findComments(postId, pageRequest));
     }
 
-    /**
-     * TODO: 대댓글 조회 "/posts/comments/{commentId}"
-     */
     @Operation(summary = "댓글 조회 페이지 - 게시글에 작성된 특정 댓글의 자식 댓글 조회 API", description = "Post의 자식 Comment 목록을 조회합니다.")
     @Parameters({
-            @Parameter(name = "page", description = "페이징 번호 page, Query String입니다.", in = ParameterIn.QUERY),
+            @Parameter(name = "page", description = "페이징 번호 page, Query String입니다.", required = true, in = ParameterIn.QUERY),
             @Parameter(name = "size", description = "페이징 크기 size, Query String입니다.", in = ParameterIn.QUERY)
     })
     @GetMapping("/childs/{commentId}")
@@ -73,8 +72,7 @@ public class CommentController {
     public ApiResponse<CommentProc> post(HttpServletRequest request, @RequestBody
     CommentRequest.PostComment post, @PathVariable Long postId) {
 
-        // TODO: JwtProvider 추가 후 수정
-        Long memberId = 1L;
+        Long memberId = jwtProvider.getUserIdFromToken(request);
         CommentVO commentVO = CommentVO.of(memberId, post, postId);
 
         return ApiResponse.onSuccess(commentService.writeComment(commentVO));
@@ -89,7 +87,7 @@ public class CommentController {
         return ApiResponse.onSuccess(commentService.patchComment(commentId, content));
     }
 
-    @Operation(summary = "댓글 삭제 - 게시글에 댓글 수정 API", description = "Post의 Comment를 수정합니다.")
+    @Operation(summary = "댓글 삭제 - 게시글에 댓글 수정 API", description = "Post의 Comment를 삭제합니다.")
     @Parameter(name = "commentId", description = "댓글의 Id, Path Variable입니다.", required = true, in = ParameterIn.PATH)
     @DeleteMapping("/{commentId}")
     public ApiResponse<CommentProc> delete(@PathVariable Long commentId) {

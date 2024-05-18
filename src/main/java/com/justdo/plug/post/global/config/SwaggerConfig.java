@@ -22,24 +22,24 @@ public class SwaggerConfig {
 
         //SecuritySchemes 등록
         Components components = new Components()
-            .addSecuritySchemes(jwtSchemeName, new SecurityScheme()
-                .name(jwtSchemeName)
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT"));
+                .addSecuritySchemes(jwtSchemeName, new SecurityScheme()
+                        .name(jwtSchemeName)
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT"));
 
         return new OpenAPI()
-            .addServersItem(new Server().url("/"))
-            .info(apiInfo())
-            .addSecurityItem(securityRequirement)
-            .components(components);
+                .addServersItem(new Server().url("/"))
+                .info(apiInfo())
+                .addSecurityItem(securityRequirement)
+                .components(components);
     }
 
     private Info apiInfo() {
         return new Info()
-            .title("Glue Post-Service Springdoc 테스트")
-            .description("Springdoc을 사용한 Glue Post-Service UI 테스트")
-            .version("1.0.0");
+                .title("Glue Post-Service Springdoc 테스트")
+                .description("Springdoc을 사용한 Glue Post-Service UI 테스트 / Open Feign API는 Spring 서버 내에서 사용되는 API입니다.")
+                .version("1.0.0");
     }
 }
 

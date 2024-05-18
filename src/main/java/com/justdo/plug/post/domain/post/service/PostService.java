@@ -280,9 +280,6 @@ public class PostService {
             BlogInfoItem blogInfoItem = blogClient.findBlogInfoItem(distinctBlogId,
                 pageable.getPageNumber());
 
-            System.out.println("postSearchDTOListBlogId = " + distinctBlogId);
-            System.out.println("postSearchDTOListPostId = " + distinctPostId);
-
             PostSearchItem postSearchItem = SearchResponse.toPostSearchItem(searchResponseList,
                 photoUrls,
                 pageable, totalValue);
@@ -379,9 +376,7 @@ public class PostService {
     /**
      * Post Paging
      */
-    public StoryItem findStories(Long blogId, int page) {
-
-        PageRequest pageRequest = PageRequest.of(page, 7, Sort.by("id").descending());
+    public StoryItem findStories(Long blogId, PageRequest pageRequest) {
 
         Page<Post> posts = postRepository.findAllByBlogId(blogId, pageRequest);
 
