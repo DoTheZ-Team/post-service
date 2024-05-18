@@ -2,6 +2,7 @@ package com.justdo.plug.post.domain.comment.dto;
 
 import com.justdo.plug.post.domain.blog.BlogDto.BlogInfo;
 import com.justdo.plug.post.domain.comment.Comment;
+import com.justdo.plug.post.global.utils.DateParser;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -80,6 +81,9 @@ public class CommentResponse {
     @Getter
     public static class CommentItem {
 
+        @Schema(description = "작성자 아이디")
+        private Long memberId;
+
         @Schema(description = "댓글 아이디")
         private Long commentId;
 
@@ -93,22 +97,29 @@ public class CommentResponse {
         private String blogTitle;
 
         @Schema(description = "댓글이 작성된 시간")
-        private LocalDateTime createdAt;
+        private String createdAt;
 
         @Schema(description = "부모 댓글 아이디 / 부모 댓글인 경우 0, 대댓글인 경우 부모 댓글의 Id")
         private Long parentCommentId;
+
+        @Schema(description = "자식 댓글 존재 여부")
+        private Boolean hasChildComment;
     }
 
     public static CommentItem toCommentItem(Comment comment, BlogInfo blogInfo) {
 
+        System.out.println("comment.getChildren() = " + comment.getChildren());
+
         return CommentItem.builder()
+                .memberId(comment.getMemberId())
                 .commentId(comment.getId())
                 .content(comment.getContent())
                 .blogProfile(blogInfo.getProfile())
                 .blogTitle(blogInfo.getTitle())
-                .createdAt(LocalDateTime.now())
+                .createdAt(DateParser.dateTimeParse(LocalDateTime.now()))
                 .parentCommentId(
                         comment.getParentComment() != null ? comment.getParentComment().getId() : 0)
+                .hasChildComment(!comment.getChildren().isEmpty())
                 .build();
     }
 
