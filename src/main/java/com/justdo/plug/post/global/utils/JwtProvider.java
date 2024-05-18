@@ -1,23 +1,17 @@
 package com.justdo.plug.post.global.utils;
 
 import com.justdo.plug.post.global.exception.ApiException;
+import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import com.justdo.plug.post.global.response.code.status.ErrorStatus;
-
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
 
 import static com.justdo.plug.post.global.utils.JwtProperties.*;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
 
 @Component
 public class JwtProvider {

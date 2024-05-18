@@ -12,7 +12,7 @@ import lombok.*;
 public class Likes extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "likesId")
+    @Column(name = "like_id")
     private Long id;
 
     @Column(nullable = false)

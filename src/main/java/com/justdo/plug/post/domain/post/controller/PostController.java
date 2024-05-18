@@ -5,14 +5,10 @@ import com.justdo.plug.post.domain.category.service.CategoryService;
 import com.justdo.plug.post.domain.likes.service.LikesService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
-import com.justdo.plug.post.domain.post.dto.PostRequestDto;
-import com.justdo.plug.post.domain.post.dto.PostResponseDto;
-import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
-import com.justdo.plug.post.domain.post.dto.PreviewResponse;
+import com.justdo.plug.post.domain.post.dto.*;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.BlogPostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
-import com.justdo.plug.post.domain.post.dto.SearchResponse;
 import com.justdo.plug.post.domain.post.service.PostService;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.global.utils.JwtProvider;
@@ -21,21 +17,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
-
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Post API")
 @RestController
@@ -196,7 +184,7 @@ public class PostController {
     }
 
     // 게시글 좋아요 등록
-    @PostMapping("like/{postId}")
+    @PostMapping("likes/{postId}")
     @Operation(summary = "특정게시글 좋아요 요창", description = "memberId는 JWT토큰 파싱 예정")
     public String LikePost(@PathVariable Long postId, HttpServletRequest request){
 
@@ -207,7 +195,7 @@ public class PostController {
     }
 
     // 게시글 좋아요 취소
-    @DeleteMapping("like/{postId}")
+    @DeleteMapping("likes/{postId}")
     @Operation(summary = "특정게시글 좋아요 취소 요청", description = "memberId는 JWT토큰 파싱 예정")
     public String LikeCancelPost(@PathVariable Long postId, HttpServletRequest request){
 

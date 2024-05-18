@@ -1,6 +1,5 @@
 package com.justdo.plug.post.domain.post.service;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,20 +7,15 @@ import com.justdo.plug.post.domain.blog.BlogClient;
 import com.justdo.plug.post.domain.category.Category;
 import com.justdo.plug.post.domain.category.repository.CategoryRepository;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
-import com.justdo.plug.post.domain.likes.Likes;
 import com.justdo.plug.post.domain.likes.repository.LikesRepository;
 import com.justdo.plug.post.domain.photo.Photo;
 import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
-import com.justdo.plug.post.domain.post.dto.PostRequestDto;
-import com.justdo.plug.post.domain.post.dto.PostResponseDto;
-import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
-import com.justdo.plug.post.domain.post.dto.PreviewResponse;
+import com.justdo.plug.post.domain.post.dto.*;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.StoryItem;
-import com.justdo.plug.post.domain.post.dto.SearchResponse;
 import com.justdo.plug.post.domain.post.dto.SearchResponse.BlogInfoItem;
 import com.justdo.plug.post.domain.post.dto.SearchResponse.PostSearch;
 import com.justdo.plug.post.domain.post.dto.SearchResponse.PostSearchItem;
@@ -34,6 +28,14 @@ import com.justdo.plug.post.elastic.PostDocument;
 import com.justdo.plug.post.elastic.PostElasticsearchRepository;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
+import lombok.RequiredArgsConstructor;
+import org.json.JSONException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.*;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -41,19 +43,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-
-import lombok.RequiredArgsConstructor;
-import org.json.JSONException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -409,7 +402,6 @@ public class PostService {
         Post post = postRepository.findByEsId(id)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
         Long postId = post.getId();
-        System.out.println("postId = " + postId);
 
         // 카테고리 변경
         Category category = categoryRepository.findByPostId(postId)
@@ -421,7 +413,7 @@ public class PostService {
         postHashtagService.changeHashtag(hashtags, post);
 
         // 이미지 경로 변경
-        photoService.updatePhotoUrls(postId, updateDto);
+        photoService.updatePhotoUrls(post, postId, updateDto);
 
         // 내용, 제목, 프리뷰 변경
         post.changeContent(updateDto.getContent());
@@ -437,7 +429,6 @@ public class PostService {
             docFields.put("content", updateDto.getContent());
             docFields.put("hashtags", updateDto.getHashtags());
             docFields.put("categoryName", updateDto.getCategoryName());
-            docFields.put("photoUrl", updateDto.getPhotoUrls());
             docFields.put("preview", preview);
 
             // "doc" 필드 아래에 updateDto 객체를 넣어서 JSON 문자열로 변환

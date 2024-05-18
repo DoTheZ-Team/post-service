@@ -3,18 +3,15 @@ package com.justdo.plug.post.domain.photo.service;
 import com.justdo.plug.post.domain.photo.Photo;
 import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.post.Post;
-import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
-import com.justdo.plug.post.global.exception.ApiException;
-import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
@@ -22,7 +19,6 @@ import org.springframework.stereotype.Service;
 public class PhotoService {
 
     private final PhotoRepository photoRepository;
-    private final PostRepository postRepository;
 
     public void createPhoto(List<String> photoUrls, Post post) {
 
@@ -48,12 +44,9 @@ public class PhotoService {
     }
 
     @Transactional
-    public void updatePhotoUrls(Long postId, PostUpdateDto updateDto) {
+    public void updatePhotoUrls(Post post, Long postId, PostUpdateDto updateDto) {
         // 기존의 photos 삭제
         photoRepository.deleteByPostId(postId);
-
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
         // 새로운 photoUrl 리스트를 기반으로 Photo 엔티티 생성
         List<Photo> newPhotos = updateDto.getPhotoUrls().stream()
