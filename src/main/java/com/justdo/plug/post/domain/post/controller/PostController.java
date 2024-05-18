@@ -2,7 +2,6 @@ package com.justdo.plug.post.domain.post.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.justdo.plug.post.domain.category.service.CategoryService;
-import com.justdo.plug.post.domain.likes.service.LikesService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.*;
@@ -35,7 +34,6 @@ public class PostController {
     private final PostService postService;
     private final CategoryService categoryService;
     private final PhotoService photoService;
-    private final LikesService likeService;
     private final JwtProvider jwtProvider;
 
 
@@ -183,24 +181,4 @@ public class PostController {
         return postService.searchPost(keyword, pageRequest);
     }
 
-    // 게시글 좋아요 등록
-    @PostMapping("likes/{postId}")
-    @Operation(summary = "특정게시글 좋아요 요창", description = "memberId는 JWT토큰 파싱 예정")
-    public String LikePost(@PathVariable Long postId, HttpServletRequest request){
-
-
-        Long memberId = jwtProvider.getUserIdFromToken(request);
-        return likeService.postLike(postId, memberId);
-
-    }
-
-    // 게시글 좋아요 취소
-    @DeleteMapping("likes/{postId}")
-    @Operation(summary = "특정게시글 좋아요 취소 요청", description = "memberId는 JWT토큰 파싱 예정")
-    public String LikeCancelPost(@PathVariable Long postId, HttpServletRequest request){
-
-        Long memberId = jwtProvider.getUserIdFromToken(request);
-        return likeService.postLikeCancel(postId, memberId);
-
-    }
 }
