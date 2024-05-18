@@ -15,16 +15,17 @@ public class PostRequestDto {
     private List<String> hashtags;
     private String categoryName;
     private List<String> photoUrls;
-    private Long memberId; // TODO : JWT 토큰으로 처리할 것
+    private Long memberId;
 
-    public Post toEntity(PostRequestDto postRequestDto, String preview, Long blogId) {
+    public Post toEntity(PostRequestDto postRequestDto, String preview, Long blogId, Long memberId) {
         return Post.builder()
             .title(postRequestDto.getTitle())
             .content(postRequestDto.getContent())
             .temporaryState(postRequestDto.temporaryState)
             .memberId(postRequestDto.getMemberId())
             .blogId(blogId)
-            .preview(preview)
+            .preview(preview).memberId(memberId)
             .build();
     }
+
 }

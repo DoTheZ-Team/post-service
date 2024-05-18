@@ -4,28 +4,38 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.blog.BlogClient;
+import com.justdo.plug.post.domain.category.Category;
+import com.justdo.plug.post.domain.category.repository.CategoryRepository;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
+import com.justdo.plug.post.domain.likes.repository.LikesRepository;
+import com.justdo.plug.post.domain.photo.Photo;
+import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
-import com.justdo.plug.post.domain.post.dto.PostRequestDto;
-import com.justdo.plug.post.domain.post.dto.PostResponseDto;
-import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
-import com.justdo.plug.post.domain.post.dto.PreviewResponse;
+import com.justdo.plug.post.domain.post.dto.*;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.StoryItem;
-import com.justdo.plug.post.domain.post.dto.SearchResponse;
 import com.justdo.plug.post.domain.post.dto.SearchResponse.BlogInfoItem;
 import com.justdo.plug.post.domain.post.dto.SearchResponse.PostSearch;
 import com.justdo.plug.post.domain.post.dto.SearchResponse.PostSearchItem;
 import com.justdo.plug.post.domain.post.dto.SearchResponse.SearchInfo;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
+import com.justdo.plug.post.domain.posthashtag.repository.PostHashtagRepository;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.elastic.PostDocument;
 import com.justdo.plug.post.elastic.PostElasticsearchRepository;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
+import lombok.RequiredArgsConstructor;
+import org.json.JSONException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.*;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -37,17 +47,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
-import org.json.JSONException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
@@ -60,6 +59,10 @@ public class PostService {
     private final PostElasticsearchRepository postElasticsearchRepository;
     private final PhotoService photoService;
     private final BlogClient blogClient;
+    private final PostHashtagRepository postHashtagRepository;
+    private final PhotoRepository photoRepository;
+    private final CategoryRepository categoryRepository;
+    private final LikesRepository likesRepository;
 
 
     @Value("${spring.elasticsearch.uris}")
@@ -85,17 +88,17 @@ public class PostService {
 
     // BLOG003: 블로그 작성
     @Transactional
-    public Post save(PostRequestDto requestDto, Long blogId) throws JsonProcessingException {
+    public Post save(PostRequestDto requestDto, Long blogId, Long memberId) throws JsonProcessingException {
 
         String preview = parseContent(requestDto.getContent());
 
-        Post post = requestDto.toEntity(requestDto, preview, blogId);
+        Post post = requestDto.toEntity(requestDto, preview, blogId, memberId);
         Post save = postRepository.save(post);
 
-        String esId = savePostIndex(save);
-        post.setEsId(esId);
 
-        System.out.println(post.getEsId());
+        String esId = savePostIndex(save);
+        post.changeEsId(esId);
+
         return save;
     }
 
@@ -303,28 +306,34 @@ public class PostService {
         return document.getId();
     }
 
-    public String deletePost(String id) {
+    @Transactional
+    public String deletePost(String esId) {
 
         // MySQL
         // EsId 값으로 Post를 찾기
-        /*
-        Post post = postRepository.findByEsId(id)
+
+        Post post = postRepository.findByEsId(esId)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
         Long postId = post.getId();
-        List<PostHashtag> postHashtags = postHashtagRepository.findByPostId(postId);
-        postHashtagRepository.deleteAll(postHashtags);
+        postHashtagService.deletePostHashtags(postId);
 
-        List<Photo> photos = photoRepository.findByPostId(postId);
-        photoRepository.deleteAll(photos);
+        List<Photo> photos = photoRepository.findAllByPostId(postId);
+        if (photos != null && !photos.isEmpty()) {
+            photoRepository.deleteAll(photos);
+        }
+
+        categoryRepository.deleteByPost(post);
+
+        likesRepository.deleteByPostId(postId);
 
         // 찾은 Post 삭제
-        postRepository.delete(post);
+        postRepository.deleteByEsId(esId);
 
-         */
+
 
         // Elasticsearch
-        String deleteUrl = url + "/post/_doc/" + URLEncoder.encode(id, StandardCharsets.UTF_8);
+        String deleteUrl = url + "/post/_doc/" + URLEncoder.encode(esId, StandardCharsets.UTF_8);
 
         HttpRequest deleteRequest = HttpRequest.newBuilder()
             .uri(URI.create(deleteUrl))
@@ -383,6 +392,7 @@ public class PostService {
         return PreviewResponse.toStoryItem(posts, photoUrlList);
     }
 
+    @Transactional
     public String UpdatePost(String id, PostUpdateDto updateDto) throws JsonProcessingException {
 
         String content = updateDto.getContent();
@@ -391,9 +401,24 @@ public class PostService {
 
         Post post = postRepository.findByEsId(id)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
-        post.setContent(updateDto.getContent());
-        post.setPreview(preview);
-        post.setTitle(updateDto.getTitle());
+        Long postId = post.getId();
+
+        // 카테고리 변경
+        Category category = categoryRepository.findByPostId(postId)
+                .orElseThrow(() -> new ApiException(ErrorStatus._CATEGORY_NOT_FOUND));
+        category.changeName(updateDto.getCategoryName());
+
+        // 해시태그 변경
+        List<String> hashtags = updateDto.getHashtags();
+        postHashtagService.changeHashtag(hashtags, post);
+
+        // 이미지 경로 변경
+        photoService.updatePhotoUrls(post, postId, updateDto);
+
+        // 내용, 제목, 프리뷰 변경
+        post.changeContent(updateDto.getContent());
+        post.changeTitle(updateDto.getTitle());
+        post.changePreview(preview);
 
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -404,7 +429,6 @@ public class PostService {
             docFields.put("content", updateDto.getContent());
             docFields.put("hashtags", updateDto.getHashtags());
             docFields.put("categoryName", updateDto.getCategoryName());
-            docFields.put("photoUrl", updateDto.getPhotoUrl());
             docFields.put("preview", preview);
 
             // "doc" 필드 아래에 updateDto 객체를 넣어서 JSON 문자열로 변환

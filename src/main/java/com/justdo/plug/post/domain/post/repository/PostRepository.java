@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import feign.Param;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -27,6 +28,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Optional<Post> findByEsId(String esId);
 
+    void deleteByEsId(String esId);
+
+
     @Query("SELECT p FROM Post p WHERE p.blogId in :blogIdList")
     Slice<Post> findByBlogIdList(List<Long> blogIdList, PageRequest pageRequest);
 
@@ -34,7 +38,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Slice<Post> findByMemberIdList(List<Long> memberIdList, PageRequest pageRequest);
 
     @Modifying
-    @Query("UPDATE Post p SET p.like_count = p.like_count + 1 WHERE p.id = :postId")
+    @Query("UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :postId")
     void increaseLikeCount(@Param("postId") Long postId);
 
 }
