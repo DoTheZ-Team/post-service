@@ -474,5 +474,10 @@ public class PostService {
         postRepository.increaseLikeCount(postId);
     }
 
+    public Post getPost(Long postId) {
+        return postRepository.findById(postId).orElseThrow(
+                () -> new ApiException(ErrorStatus._POST_NOT_FOUND)
+        );
+    }
 
 }

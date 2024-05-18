@@ -16,13 +16,13 @@ import org.springframework.web.filter.HiddenHttpMethodFilter;
 @EnableFeignClients
 @EnableJpaRepositories(basePackages = "com.justdo.plug.post.domain")
 @EnableElasticsearchRepositories(basePackages = "com.justdo.plug.post.elastic")
-@ComponentScan(basePackages = {"com.justdo.plug.post.elastic", "com.justdo.plug.post.domain", "com.justdo.plug.post.global.utils"})
+@ComponentScan(basePackages = {"com.justdo.plug.post.elastic", "com.justdo.plug.post.domain", "com.justdo.plug.post.global.utils", "com.justdo.plug.post.global.exception"})
 @SpringBootApplication
 @Import(SwaggerConfig.class)
 public class PostApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PostApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(PostApplication.class, args);
+    }
 
 }
