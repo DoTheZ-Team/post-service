@@ -4,14 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.justdo.plug.post.domain.category.service.CategoryService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
-import com.justdo.plug.post.domain.post.dto.PostRequestDto;
-import com.justdo.plug.post.domain.post.dto.PostResponseDto;
-import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
-import com.justdo.plug.post.domain.post.dto.PreviewResponse;
+import com.justdo.plug.post.domain.post.dto.*;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.BlogPostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
-import com.justdo.plug.post.domain.post.dto.SearchResponse;
 import com.justdo.plug.post.domain.post.service.PostService;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.global.response.ApiResponse;
@@ -90,6 +86,9 @@ public class PostController {
 
         // 4. Photo 저장
         photoService.createPhoto(requestDto.getPhotoUrls(), post);
+
+        // 5. Recommend Service 로 해시태그 보내주기
+        postHashtagService.sendNewHashtags(memberId, requestDto.getHashtags());
 
         return ApiResponse.onSuccess("게시글이 성공적으로 업로드 되었습니다");
     }

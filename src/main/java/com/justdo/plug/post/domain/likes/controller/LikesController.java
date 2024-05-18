@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Like 게시글 좋아요 관련 API입니다")
+@Tag(name = "Like 게시글 좋아요 관련 API입니다.")
 @RestController
 @RequestMapping("/posts/")
 @RequiredArgsConstructor

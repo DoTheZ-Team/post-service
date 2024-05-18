@@ -3,6 +3,7 @@ package com.justdo.plug.post.domain.posthashtag.service;
 import com.justdo.plug.post.domain.hashtag.Hashtag;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.post.Post;
+import com.justdo.plug.post.domain.post.dto.HashtagRequestDTO;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
 import com.justdo.plug.post.domain.posthashtag.repository.PostHashtagRepository;
@@ -150,5 +151,15 @@ public class PostHashtagService {
     public void deletePostHashtags(Long postId) {
         List<PostHashtag> postHashtags = postHashtagRepository.findByPostId(postId);
         postHashtagRepository.deleteAll(postHashtags);
+    }
+
+    public void sendNewHashtags(Long memberId, List<String> hashtags){
+        HashtagRequestDTO hashtagRequestdto = new HashtagRequestDTO();
+
+        hashtagRequestdto.setHashtags(hashtags);
+        hashtagRequestdto.setMemberId(memberId);
+
+        //TODO: Recommend Service 로 POST API 요청하기
+
     }
 }
