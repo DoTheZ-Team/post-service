@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
+import com.justdo.plug.post.global.response.ApiResponse;
 
 import java.util.List;
 
@@ -41,25 +42,25 @@ public class PostController {
     @GetMapping
     @Operation(summary = "모든 게시글 리스트 조회 요청", description = "")
 
-    public List<Post> ViewList() {
+    public ApiResponse<List<Post>> ViewList() {
 
-        return postService.getAllPosts();
+        return ApiResponse.onSuccess(postService.getAllPosts());
 
     }
 
     // BLOG002: 게시글 상세페이지 조회 요청
     @GetMapping("{postId}")
     @Operation(summary = "특정 게시글 상세페이지 조회 요청", description = "")
-    public PostResponseDto ViewPage(@PathVariable Long postId) throws JSONException {
+    public ApiResponse<PostResponseDto> ViewPage(@PathVariable Long postId) throws JSONException {
 
-        return postService.getPostById(postId);
+        return ApiResponse.onSuccess(postService.getPostById(postId));
 
     }
 
     // BLOG003: 게시글 작성 요청
     @PostMapping("{blogId}")
     @Operation(summary = "게시글 작성 요청", description = "")
-    public String PostBlog(HttpServletRequest request, @RequestBody PostRequestDto requestDto, @PathVariable Long blogId)
+    public ApiResponse<String> PostBlog(HttpServletRequest request, @RequestBody PostRequestDto requestDto, @PathVariable Long blogId)
             throws JsonProcessingException {
 
         Long memberId = jwtProvider.getUserIdFromToken(request);
@@ -76,23 +77,23 @@ public class PostController {
         // 4. Photo 저장
         photoService.createPhoto(requestDto.getPhotoUrls(), post);
 
-        return "게시글이 성공적으로 업로드 되었습니다";
+        return ApiResponse.onSuccess("게시글이 성공적으로 업로드 되었습니다");
     }
 
     // BLOG004: 게시글 수정 요청
     @PatchMapping("{esId}")
     @Operation(summary = "특정게시글 수정 요청", description = "elastic search id로 요청")
-    public String EditBlog(@PathVariable String esId, @RequestBody PostUpdateDto updateDto)
+    public ApiResponse<String> EditBlog(@PathVariable String esId, @RequestBody PostUpdateDto updateDto)
             throws JsonProcessingException {
 
-        return postService.UpdatePost(esId, updateDto);
+        return ApiResponse.onSuccess(postService.UpdatePost(esId, updateDto));
     }
 
     // BLOG005: 게시글 삭제 요청
     @DeleteMapping("{esId}")
     @Operation(summary = "특정게시글 삭제 요청", description = "elastic search id로 요청")
-    public String deletePost(@PathVariable String esId) {
-        return postService.deletePost(esId);
+    public ApiResponse<String> deletePost(@PathVariable String esId) {
+        return ApiResponse.onSuccess(postService.deletePost(esId));
     }
 
     // BlOG007: 특정 멤버가 사용한 HASHTAG 값 조회
@@ -106,9 +107,9 @@ public class PostController {
 
     // BlOG008: 게시글의 글만 조회하기
     @GetMapping("preview/{postId}")
-    public String PreviewPost(@PathVariable Long postId) throws JsonProcessingException {
+    public ApiResponse<String> PreviewPost(@PathVariable Long postId) throws JsonProcessingException {
 
-        return postService.getPreviewPost(postId);
+        return ApiResponse.onSuccess(postService.getPreviewPost(postId));
 
     }
 
@@ -151,10 +152,10 @@ public class PostController {
             @Parameter(name = "page", description = "페이지 번호, Query String입니다.", required = true, in = ParameterIn.QUERY)
     })
     @GetMapping("blogs/{blogId}/stories")
-    public PreviewResponse.StoryItem getStories(@PathVariable Long blogId,
+    public ApiResponse<PreviewResponse.StoryItem> getStories(@PathVariable Long blogId,
             @RequestParam(value = "page", defaultValue = "0") int page) {
 
-        return postService.findStories(blogId, page);
+        return ApiResponse.onSuccess(postService.findStories(blogId, page));
     }
 
     // BLOG009: 블로그 아이디로 해시태그 추출하기
@@ -173,12 +174,12 @@ public class PostController {
     })
 
     @GetMapping("search")
-    public SearchResponse.SearchInfo searchElastic(@RequestParam String keyword,
+    public ApiResponse<SearchResponse.SearchInfo> searchElastic(@RequestParam String keyword,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size);
-        return postService.searchPost(keyword, pageRequest);
+        return ApiResponse.onSuccess(postService.searchPost(keyword, pageRequest));
     }
 
 }
