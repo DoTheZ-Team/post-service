@@ -60,13 +60,13 @@ public class PreviewResponse {
         private List<PostItem> postItems;
 
         @Schema(description = "다음 페이지의 여부")
-        private boolean hasNext;
+        private Boolean hasNext;
 
         @Schema(description = "첫 페이지의 여부")
-        private boolean hasFirst;
+        private Boolean isFirst;
 
         @Schema(description = "마지막 페이지의 여부")
-        private boolean hasLast;
+        private Boolean isLast;
     }
 
     public static PostItemSlice toPostItemSlice(Slice<Post> posts, List<String> photoUrls) {
@@ -82,8 +82,8 @@ public class PreviewResponse {
         return PostItemSlice.builder()
             .postItems(postItems)
             .hasNext(posts.hasNext())
-            .hasFirst(posts.isFirst())
-            .hasLast(posts.isLast())
+            .isFirst(posts.isFirst())
+            .isLast(posts.isLast())
             .build();
 
     }

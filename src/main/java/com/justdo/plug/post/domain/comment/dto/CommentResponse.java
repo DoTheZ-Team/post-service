@@ -48,13 +48,13 @@ public class CommentResponse {
         List<CommentItem> commentItems;
 
         @Schema(description = "추가 조회할 목록이 있는지의 여부")
-        private boolean hasNext;
+        private Boolean hasNext;
 
         @Schema(description = "첫 페이지인지 여부")
-        private boolean isFirst;
+        private Boolean isFirst;
 
         @Schema(description = "마지막 페이지인지 여부")
-        private boolean isLast;
+        private Boolean isLast;
     }
 
     public static CommentResult toCommentResult(Slice<Comment> commentSlice,
