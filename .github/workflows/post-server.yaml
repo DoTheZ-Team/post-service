@@ -31,7 +31,7 @@ jobs:
         shell: bash
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew test -i
 
       - name: Login KakaoCloud
         uses: docker/login-action@v2
