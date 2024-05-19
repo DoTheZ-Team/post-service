@@ -4,14 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.justdo.plug.post.domain.category.service.CategoryService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
-import com.justdo.plug.post.domain.post.dto.PostRequestDto;
-import com.justdo.plug.post.domain.post.dto.PostResponseDto;
-import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
-import com.justdo.plug.post.domain.post.dto.PreviewResponse;
+import com.justdo.plug.post.domain.post.dto.*;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.BlogPostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
-import com.justdo.plug.post.domain.post.dto.SearchResponse;
 import com.justdo.plug.post.domain.post.service.PostService;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.global.response.ApiResponse;
@@ -22,20 +18,13 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Post 게시글 관련 API입니다.")
 @RestController
@@ -91,6 +80,9 @@ public class PostController {
         // 4. Photo 저장
         photoService.createPhoto(requestDto.getPhotoUrls(), post);
 
+        // 5. Recommend Service 로 해시태그 보내주기
+        postHashtagService.sendNewHashtags(memberId, requestDto.getHashtags(), request);
+
         return ApiResponse.onSuccess("게시글이 성공적으로 업로드 되었습니다");
     }
 
@@ -98,9 +90,13 @@ public class PostController {
     @PatchMapping("{esId}")
     @Operation(summary = "특정게시글 수정 요청", description = "해당 게시글을 수정합니다")
     @Parameter(name = "esId", description = "포스트의 elasticsearch id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<String> EditBlog(@PathVariable String esId,
+    public ApiResponse<String> EditBlog(HttpServletRequest request, @PathVariable String esId,
             @RequestBody PostUpdateDto updateDto)
             throws JsonProcessingException {
+
+        // 전체 해시태그 Recommend Service 로 보내주기
+        Long memberId = jwtProvider.getUserIdFromToken(request);
+        postHashtagService.sendAllHashtags(memberId, request);
 
         return ApiResponse.onSuccess(postService.UpdatePost(esId, updateDto));
     }
@@ -109,7 +105,11 @@ public class PostController {
     @DeleteMapping("{esId}")
     @Operation(summary = "특정게시글 삭제 요청", description = "해당 게시글을 삭제합니다")
     @Parameter(name = "esId", description = "포스트의 elasticsearch id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<String> deletePost(@PathVariable String esId) {
+    public ApiResponse<String> deletePost(HttpServletRequest request, @PathVariable String esId) {
+
+        Long memberId = jwtProvider.getUserIdFromToken(request);
+        postHashtagService.sendAllHashtags(memberId, request);
+
         return ApiResponse.onSuccess(postService.deletePost(esId));
     }
 
