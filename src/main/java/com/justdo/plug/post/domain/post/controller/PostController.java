@@ -81,7 +81,7 @@ public class PostController {
         photoService.createPhoto(requestDto.getPhotoUrls(), post);
 
         // 5. Recommend Service 로 해시태그 보내주기
-        postHashtagService.sendNewHashtags(memberId, requestDto.getHashtags());
+        postHashtagService.sendNewHashtags(memberId, requestDto.getHashtags(), request);
 
         return ApiResponse.onSuccess("게시글이 성공적으로 업로드 되었습니다");
     }
@@ -96,8 +96,7 @@ public class PostController {
 
         // 전체 해시태그 Recommend Service 로 보내주기
         Long memberId = jwtProvider.getUserIdFromToken(request);
-        List<String> hashtags = postHashtagService.getHashtags(memberId);
-        postHashtagService.sendAllHashtags(memberId, hashtags);
+        postHashtagService.sendAllHashtags(memberId, request);
 
         return ApiResponse.onSuccess(postService.UpdatePost(esId, updateDto));
     }
@@ -109,8 +108,7 @@ public class PostController {
     public ApiResponse<String> deletePost(HttpServletRequest request, @PathVariable String esId) {
 
         Long memberId = jwtProvider.getUserIdFromToken(request);
-        List<String> hashtags = postHashtagService.getHashtags(memberId);
-        postHashtagService.sendAllHashtags(memberId, hashtags);
+        postHashtagService.sendAllHashtags(memberId, request);
 
         return ApiResponse.onSuccess(postService.deletePost(esId));
     }

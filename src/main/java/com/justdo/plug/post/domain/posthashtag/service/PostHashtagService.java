@@ -1,21 +1,27 @@
 package com.justdo.plug.post.domain.posthashtag.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.hashtag.Hashtag;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.post.Post;
-import com.justdo.plug.post.domain.post.dto.HashtagRequestDTO;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
 import com.justdo.plug.post.domain.posthashtag.repository.PostHashtagRepository;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
+import com.justdo.plug.post.global.utils.JwtProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,6 +31,13 @@ public class PostHashtagService {
     private final PostHashtagRepository postHashtagRepository;
     private final HashtagService hashtagService;
     private final PostRepository postRepository;
+    private final JwtProvider jwtProvider;
+
+    @Value("${elasticsearch.api-key}")
+    private String apiKey;
+
+    @Value("${recommend-url}")
+    private String recUrl;
 
     /**
      * Hashtag 생성
@@ -154,23 +167,75 @@ public class PostHashtagService {
         postHashtagRepository.deleteAll(postHashtags);
     }
 
-    public void sendNewHashtags(Long memberId, List<String> hashtags){
-        HashtagRequestDTO hashtagRequestdto = new HashtagRequestDTO();
+    public void sendNewHashtags(Long memberId, List<String> hashtags, HttpServletRequest request) {
 
-        hashtagRequestdto.setHashtags(hashtags);
-        hashtagRequestdto.setMemberId(memberId);
+        String updateURL = recUrl + "/recommends/update";
+        String jsonBody;
+        ObjectMapper objectMapper = new ObjectMapper();
 
-        //TODO: Recommend Service 로 POST API 요청하기
+        String token = jwtProvider.parseToken(request);
+        try {
+            Map<String, Object> docFields = new HashMap<>();
+            docFields.put("newHashtag", hashtags);
+            docFields.put("memberId", memberId);
 
+            jsonBody = objectMapper.writeValueAsString(docFields);
+            HttpRequest updateRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(updateURL))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + token)
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> updateResponse = client.send(updateRequest,
+                    HttpResponse.BodyHandlers.ofString());
+
+            if (updateResponse.statusCode() == 200) {
+                System.out.println("업데이트 완료");
+            } else {
+                System.out.println("업데이트 도중 오류가 발생하였습니다: " + updateResponse);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void sendAllHashtags(Long memberId, List<String> hashtags){
-        HashtagRequestDTO hashtagRequestdto = new HashtagRequestDTO();
+    public void sendAllHashtags(Long memberId, HttpServletRequest request){
 
-        hashtagRequestdto.setHashtags(hashtags);
-        hashtagRequestdto.setMemberId(memberId);
+        List<String> hashtags = getHashtags(memberId);
 
-        //TODO: Recommend Service 로 POST API 요청하기
+        String updateURL = recUrl + "/recommends/edit";
+        String jsonBody;
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String token = jwtProvider.parseToken(request);
+        try {
+            Map<String, Object> docFields = new HashMap<>();
+            docFields.put("changedHashtag", hashtags);
+            docFields.put("memberId", memberId);
+
+            jsonBody = objectMapper.writeValueAsString(docFields);
+            System.out.println("jsonBody = " + jsonBody);
+            HttpRequest updateRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(updateURL))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + token)
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> updateResponse = client.send(updateRequest,
+                    HttpResponse.BodyHandlers.ofString());
+
+            if (updateResponse.statusCode() == 200) {
+                System.out.println("업데이트 완료");
+            } else {
+                System.out.println("업데이트 도중 오류가 발생하였습니다: " + updateResponse);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 

@@ -30,7 +30,7 @@ public class JwtProvider {
         return validateToken(accessToken);
     }
 
-    private String parseToken(HttpServletRequest request) {
+    public String parseToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(HEADER_AUTHORIZATION);
         if (bearerToken == null || !bearerToken.startsWith(TOKEN_PREFIX)) {
             throw new ApiException(ErrorStatus._JWT_NOT_FOUND);
