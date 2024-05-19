@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+
 @Getter
 @AllArgsConstructor
 public enum ErrorStatus implements BaseErrorCode {
@@ -22,11 +23,25 @@ public enum ErrorStatus implements BaseErrorCode {
     //블로그
     _BLOG_NOT_FOUND(HttpStatus.NOT_FOUND, "BLOG404", "해당 블로그를 찾을 수 없습니다."),
 
+    // 댓글
+    _COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT4001", "해당 댓글을 찾을 수 없습니다."),
+    _COMMENT_OVER_DEPTH(HttpStatus.BAD_REQUEST, "COMMENT4002", "해당 서비스는 대댓글까지만 작성할 수 있습니다."),
+
     //해시태그
     _NO_HASHTAGS(HttpStatus.NOT_FOUND, "HASHTAGS404", "해당 사용자가 사용한 해시태그를 찾을 수 없습니다."),
 
     // 해시태그
-    _HASHTAG_NOT_FOUND(HttpStatus.NOT_FOUND, "HASHTAG404", "해당 해시태그를 찾을 수 없습니다.");
+    _HASHTAG_NOT_FOUND(HttpStatus.NOT_FOUND, "HASHTAG404", "해당 해시태그를 찾을 수 없습니다."),
+
+    // JWT 관련
+    _JWT_NOT_FOUND(HttpStatus.NOT_FOUND, "JWT404", "Header에 JWT가 존재하지 않습니다."),
+
+    // Category 관련
+    _CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY404", "해당 카테고리가 존재하지 않습니다."),
+
+    // Photo 관련
+    _PHOTO_NOT_FOUND(HttpStatus.NOT_FOUND, "Photo404", "해당 이미지 경로가 존재하지 않습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;
