@@ -3,7 +3,7 @@ package com.justdo.plug.post;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-//@SpringBootTest
+@SpringBootTest
 class PostApplicationTests {
 
 	@Test
