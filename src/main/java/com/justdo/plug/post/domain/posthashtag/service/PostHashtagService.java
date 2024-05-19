@@ -36,8 +36,7 @@ public class PostHashtagService {
     @Value("${elasticsearch.api-key}")
     private String apiKey;
 
-    @Value("${recommend-url}")
-    private String recUrl;
+    private final String recUrl = "http://210.109.54.22:8085";
 
     /**
      * Hashtag 생성
