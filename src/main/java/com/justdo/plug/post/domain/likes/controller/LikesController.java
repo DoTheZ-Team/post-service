@@ -22,7 +22,7 @@ public class LikesController {
 
     // 게시글 좋아요 등록
     @PostMapping("likes/{postId}")
-    @Operation(summary = "특정게시글 좋아요 요청", description = "해당 게시글에 대해 좋아요를 누릅니다")
+    @Operation(summary = "특정게시글 좋아요 삭제/생성 요청", description = "해당 게시글에 대해 좋아요를 누르지 않았다면 좋아요 생성, 이미 눌렀다면 좋아요 삭제를 합니다")
     @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
     public ApiResponse<String> LikePost(@PathVariable Long postId, HttpServletRequest request){
 
@@ -31,7 +31,7 @@ public class LikesController {
         return ApiResponse.onSuccess(likesService.postLike(postId, memberId));
 
     }
-
+    /*
     // 게시글 좋아요 취소
     @DeleteMapping("likes/{postId}")
     @Operation(summary = "특정게시글 좋아요 취소 요청", description = "해당 게시글에 대해 좋아요를 취소합니다")
@@ -42,4 +42,6 @@ public class LikesController {
         return ApiResponse.onSuccess(likesService.postLikeCancel(postId, memberId));
 
     }
+    */
+
 }
