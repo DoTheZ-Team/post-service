@@ -304,15 +304,15 @@ public class PostService {
     }
 
     @Transactional
-    public String deletePost(String esId) {
+    public String deletePost(Long postId) {
 
         // MySQL
         // EsId 값으로 Post를 찾기
 
-        Post post = postRepository.findByEsId(esId)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
-        Long postId = post.getId();
+        String esId = post.getEsId();
         postHashtagService.deletePostHashtags(postId);
 
         List<Photo> photos = photoRepository.findAllByPostId(postId);
@@ -388,15 +388,15 @@ public class PostService {
     }
 
     @Transactional
-    public String UpdatePost(String id, PostUpdateDto updateDto) throws JsonProcessingException {
+    public String UpdatePost(Long postId, PostUpdateDto updateDto) throws JsonProcessingException {
 
         String content = updateDto.getContent();
         String preview = parseContent(content);
 
 
-        Post post = postRepository.findByEsId(id)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
-        Long postId = post.getId();
+        String esId = post.getEsId();
 
         // 카테고리 변경
         Category category = categoryRepository.findByPostId(postId)
@@ -436,7 +436,7 @@ public class PostService {
         }
 
         // Elasticsearch
-        String updateURL = url + "/post/_update/" + URLEncoder.encode(id, StandardCharsets.UTF_8);
+        String updateURL = url + "/post/_update/" + URLEncoder.encode(esId, StandardCharsets.UTF_8);
 
         HttpRequest updateRequest = HttpRequest.newBuilder()
             .uri(URI.create(updateURL))

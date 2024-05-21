@@ -92,10 +92,10 @@ public class PostController {
     }
 
     // BLOG004: 게시글 수정 요청
-    @PatchMapping("{esId}")
+    @PatchMapping("{postId}")
     @Operation(summary = "특정게시글 수정 요청", description = "해당 게시글을 수정합니다")
-    @Parameter(name = "esId", description = "포스트의 elasticsearch id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<String> EditBlog(HttpServletRequest request, @PathVariable String esId,
+    @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
+    public ApiResponse<String> EditBlog(HttpServletRequest request, @PathVariable Long postId,
             @RequestBody PostUpdateDto updateDto)
             throws JsonProcessingException {
 
@@ -103,19 +103,19 @@ public class PostController {
         Long memberId = jwtProvider.getUserIdFromToken(request);
         postHashtagService.sendAllHashtags(memberId, request);
 
-        return ApiResponse.onSuccess(postService.UpdatePost(esId, updateDto));
+        return ApiResponse.onSuccess(postService.UpdatePost(postId, updateDto));
     }
 
     // BLOG005: 게시글 삭제 요청
-    @DeleteMapping("{esId}")
+    @DeleteMapping("{postId}")
     @Operation(summary = "특정게시글 삭제 요청", description = "해당 게시글을 삭제합니다")
-    @Parameter(name = "esId", description = "포스트의 elasticsearch id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<String> deletePost(HttpServletRequest request, @PathVariable String esId) {
+    @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
+    public ApiResponse<String> deletePost(HttpServletRequest request, @PathVariable Long postId) {
 
         Long memberId = jwtProvider.getUserIdFromToken(request);
         postHashtagService.sendAllHashtags(memberId, request);
 
-        return ApiResponse.onSuccess(postService.deletePost(esId));
+        return ApiResponse.onSuccess(postService.deletePost(postId));
     }
 
     // BlOG007: 특정 멤버가 사용한 HASHTAG 값 조회
