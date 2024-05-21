@@ -17,4 +17,7 @@ public interface BlogClient {
 
     @PostMapping("/comments")
     List<BlogInfo> findBlogInfoToComment(@RequestBody List<Long> memberIdList);
+
+    @PostMapping("/subscriptions")
+    boolean checkSubscribeById(@RequestBody SubscriptionRequest.LoginSubscription loginSubscription);
 }
