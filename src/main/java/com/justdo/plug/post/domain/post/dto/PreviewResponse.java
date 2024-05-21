@@ -20,6 +20,9 @@ public class PreviewResponse {
     @Builder
     public static class PostItem {
 
+        @Schema(description = "Blog 아이디")
+        private Long blogId;
+
         @Schema(description = "Post 아이디")
         private Long postId;
 
@@ -35,20 +38,21 @@ public class PreviewResponse {
 
     public static PostItem toPostItem(Post post, String photoUrl) {
         return PostItem.builder()
-            .postId(post.getId())
-            .title(post.getTitle())
-            .preview(post.getPreview()) // TODO : 포스트의 Photo 추가
-            .photoUrl(photoUrl)
-            .build();
+                .blogId(post.getBlogId())
+                .postId(post.getId())
+                .title(post.getTitle())
+                .preview(post.getPreview())
+                .photoUrl(photoUrl)
+                .build();
     }
 
     public static List<PostItem> toPostItemList(List<Post> posts, List<String> photoUrls) {
 
         return IntStream.range(0, posts.size())
-            .mapToObj(idx -> {
-                return toPostItem(posts.get(idx), photoUrls.get(idx));
-            })
-            .toList();
+                .mapToObj(idx -> {
+                    return toPostItem(posts.get(idx), photoUrls.get(idx));
+                })
+                .toList();
     }
 
     @Getter
@@ -74,17 +78,17 @@ public class PreviewResponse {
         List<Post> postList = posts.getContent();
 
         List<PostItem> postItems = IntStream.range(0, postList.size())
-            .mapToObj(idx -> {
-                return toPostItem(postList.get(idx), photoUrls.get(idx));
-            })
-            .toList();
+                .mapToObj(idx -> {
+                    return toPostItem(postList.get(idx), photoUrls.get(idx));
+                })
+                .toList();
 
         return PostItemSlice.builder()
-            .postItems(postItems)
-            .hasNext(posts.hasNext())
-            .isFirst(posts.isFirst())
-            .isLast(posts.isLast())
-            .build();
+                .postItems(postItems)
+                .hasNext(posts.hasNext())
+                .isFirst(posts.isFirst())
+                .isLast(posts.isLast())
+                .build();
 
     }
 
@@ -118,19 +122,19 @@ public class PreviewResponse {
         List<Post> postList = posts.getContent();
 
         List<PostItem> postItems = IntStream.range(0, postList.size())
-            .mapToObj(idx -> {
-                return toPostItem(postList.get(idx), photoUrls.get(idx));
-            })
-            .toList();
+                .mapToObj(idx -> {
+                    return toPostItem(postList.get(idx), photoUrls.get(idx));
+                })
+                .toList();
 
         return StoryItem.builder()
-            .postItems(postItems)
-            .listSize(postItems.size())
-            .totalPage(posts.getTotalPages())
-            .totalElements(posts.getTotalElements())
-            .isFirst(posts.isFirst())
-            .isLast(posts.isLast())
-            .build();
+                .postItems(postItems)
+                .listSize(postItems.size())
+                .totalPage(posts.getTotalPages())
+                .totalElements(posts.getTotalElements())
+                .isFirst(posts.isFirst())
+                .isLast(posts.isLast())
+                .build();
     }
 
     @Schema(description = "내 블로그의 Post, Hashtag 정보 응답 DTO")
@@ -149,8 +153,8 @@ public class PreviewResponse {
     public static BlogPostItem toBlogPostItem(List<PostItem> postItems, List<String> hashtagNames) {
 
         return BlogPostItem.builder()
-            .postItems(postItems)
-            .hashtagNames(hashtagNames)
-            .build();
+                .postItems(postItems)
+                .hashtagNames(hashtagNames)
+                .build();
     }
 }
