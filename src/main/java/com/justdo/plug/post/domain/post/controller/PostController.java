@@ -43,7 +43,7 @@ public class PostController {
 
     // BLOG001: 게시글 리스트 조회 요청
     @GetMapping
-    @Operation(summary = "모든 게시글 리스트 조회 요청", description = "서비스내에 있는 모든 게시글 리스트를 조회합니다")
+    @Operation(summary = "모든 게시글 리스트 조회 요청", description = "데이터 베이스 내에 있는 모든 게시글 리스트를 조회 합니다")
     public ApiResponse<List<Post>> ViewList() {
 
         return ApiResponse.onSuccess(postService.getAllPosts());
@@ -52,7 +52,7 @@ public class PostController {
 
     // BLOG002: 게시글 상세페이지 조회 요청
     @GetMapping("{postId}")
-    @Operation(summary = "특정 게시글 상세페이지 조회 요청", description = "특정 게시글의 상세페이지를 요청합니다")
+    @Operation(summary = "특정 게시글 상세 페이지 조회 요청", description = "특정 게시글의 상세 페이지를 요청합니다(제목, 글, 좋아요 갯수, 현재 사용자가 좋아요 했는지 여부 등)")
     @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
     public ApiResponse<PostResponseDto> ViewPage(HttpServletRequest request, @PathVariable Long postId) throws JSONException {
 

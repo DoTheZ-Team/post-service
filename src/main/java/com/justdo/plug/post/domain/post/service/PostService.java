@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.blog.BlogClient;
+import com.justdo.plug.post.domain.blog.SubscriptionRequest;
 import com.justdo.plug.post.domain.category.Category;
 import com.justdo.plug.post.domain.category.repository.CategoryRepository;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
@@ -83,7 +84,15 @@ public class PostService {
         Post post = postRepository.findById(postId)
             .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
-        return PostResponseDto.createFromPost(post, isLike);
+        Long blogId = post.getBlogId();
+
+        SubscriptionRequest.LoginSubscription loginSubscription = new SubscriptionRequest.LoginSubscription();
+        loginSubscription.setMemberId(memberId);
+        loginSubscription.setBlogId(blogId);
+
+        boolean isSubscribe = blogClient.checkSubscribeById(loginSubscription);
+
+        return PostResponseDto.createFromPost(post, isLike, isSubscribe);
     }
 
     // BLOG003: 블로그 작성
@@ -253,7 +262,7 @@ public class PostService {
             System.out.println("totalValue = " + totalValue);
 
             // search 결과 리스트 반환
-            List<SearchResponse.PostSearch> searchResponseList = new ArrayList<>();
+            List<PostSearch> searchResponseList = new ArrayList<>();
             List<Long> postIdList = new ArrayList<>(); // Photo 조회
             List<Long> blogIdList = new ArrayList<>(); // Blog 조회
             JsonNode hitsNode = rootNode.path("hits").path("hits");
