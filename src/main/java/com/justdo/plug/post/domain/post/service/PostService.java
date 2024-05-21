@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.blog.BlogClient;
+import com.justdo.plug.post.domain.blog.SubscriptionRequest;
 import com.justdo.plug.post.domain.category.Category;
 import com.justdo.plug.post.domain.category.repository.CategoryRepository;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.likes.repository.LikesRepository;
+import com.justdo.plug.post.domain.likes.service.LikesService;
 import com.justdo.plug.post.domain.photo.Photo;
 import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
@@ -59,7 +61,6 @@ public class PostService {
     private final PostElasticsearchRepository postElasticsearchRepository;
     private final PhotoService photoService;
     private final BlogClient blogClient;
-    private final PostHashtagRepository postHashtagRepository;
     private final PhotoRepository photoRepository;
     private final CategoryRepository categoryRepository;
     private final LikesRepository likesRepository;
@@ -79,11 +80,19 @@ public class PostService {
     }
 
     // BLOG002: 게시글 상세 페이지 조회
-    public PostResponseDto getPostById(Long postId) throws JSONException {
+    public PostResponseDto getPostById(Long postId, Long memberId, boolean isLike) throws JSONException {
         Post post = postRepository.findById(postId)
             .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
-        return PostResponseDto.createFromPost(post);
+        Long blogId = post.getBlogId();
+
+        SubscriptionRequest.LoginSubscription loginSubscription = new SubscriptionRequest.LoginSubscription();
+        loginSubscription.setMemberId(memberId);
+        loginSubscription.setBlogId(blogId);
+
+        boolean isSubscribe = blogClient.checkSubscribeById(loginSubscription);
+
+        return PostResponseDto.createFromPost(post, isLike, isSubscribe);
     }
 
     // BLOG003: 블로그 작성
@@ -253,7 +262,7 @@ public class PostService {
             System.out.println("totalValue = " + totalValue);
 
             // search 결과 리스트 반환
-            List<SearchResponse.PostSearch> searchResponseList = new ArrayList<>();
+            List<PostSearch> searchResponseList = new ArrayList<>();
             List<Long> postIdList = new ArrayList<>(); // Photo 조회
             List<Long> blogIdList = new ArrayList<>(); // Blog 조회
             JsonNode hitsNode = rootNode.path("hits").path("hits");
@@ -304,15 +313,15 @@ public class PostService {
     }
 
     @Transactional
-    public String deletePost(String esId) {
+    public String deletePost(Long postId) {
 
         // MySQL
         // EsId 값으로 Post를 찾기
 
-        Post post = postRepository.findByEsId(esId)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
-        Long postId = post.getId();
+        String esId = post.getEsId();
         postHashtagService.deletePostHashtags(postId);
 
         List<Photo> photos = photoRepository.findAllByPostId(postId);
@@ -388,15 +397,15 @@ public class PostService {
     }
 
     @Transactional
-    public String UpdatePost(String id, PostUpdateDto updateDto) throws JsonProcessingException {
+    public String UpdatePost(Long postId, PostUpdateDto updateDto) throws JsonProcessingException {
 
         String content = updateDto.getContent();
         String preview = parseContent(content);
 
 
-        Post post = postRepository.findByEsId(id)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
-        Long postId = post.getId();
+        String esId = post.getEsId();
 
         // 카테고리 변경
         Category category = categoryRepository.findByPostId(postId)
@@ -436,7 +445,7 @@ public class PostService {
         }
 
         // Elasticsearch
-        String updateURL = url + "/post/_update/" + URLEncoder.encode(id, StandardCharsets.UTF_8);
+        String updateURL = url + "/post/_update/" + URLEncoder.encode(esId, StandardCharsets.UTF_8);
 
         HttpRequest updateRequest = HttpRequest.newBuilder()
             .uri(URI.create(updateURL))
