@@ -2,6 +2,7 @@ package com.justdo.plug.post.domain.post.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.justdo.plug.post.domain.category.service.CategoryService;
+import com.justdo.plug.post.domain.likes.service.LikesService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.*;
@@ -37,6 +38,7 @@ public class PostController {
     private final CategoryService categoryService;
     private final PhotoService photoService;
     private final JwtProvider jwtProvider;
+    private final LikesService likesService;
 
 
     // BLOG001: 게시글 리스트 조회 요청
@@ -52,9 +54,12 @@ public class PostController {
     @GetMapping("{postId}")
     @Operation(summary = "특정 게시글 상세페이지 조회 요청", description = "특정 게시글의 상세페이지를 요청합니다")
     @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<PostResponseDto> ViewPage(@PathVariable Long postId) throws JSONException {
+    public ApiResponse<PostResponseDto> ViewPage(HttpServletRequest request, @PathVariable Long postId) throws JSONException {
 
-        return ApiResponse.onSuccess(postService.getPostById(postId));
+        Long memberId = jwtProvider.getUserIdFromToken(request);
+        boolean isLike = likesService.isLike(memberId, postId);
+
+        return ApiResponse.onSuccess(postService.getPostById(postId, memberId, isLike));
 
     }
 

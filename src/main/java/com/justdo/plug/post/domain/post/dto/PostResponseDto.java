@@ -19,9 +19,10 @@ public class PostResponseDto {
     private LocalDateTime updatedAt;
     private Long memberId;
     private Long blogId;
+    private boolean isLike;
 
     // SUB: 게시글 반환 함수
-    public static PostResponseDto createFromPost(Post post) {
+    public static PostResponseDto createFromPost(Post post, boolean isLike) {
         String JsonContent = post.getContent();
         JSONArray jsonArray = new JSONArray(JsonContent);
         List<Object> list = jsonArray.toList();
@@ -38,6 +39,8 @@ public class PostResponseDto {
                 .updatedAt(post.getUpdatedAt())
                 .memberId(post.getMemberId())
                 .blogId(post.getBlogId())
+                .isLike(isLike)
                 .build();
     }
+
 }

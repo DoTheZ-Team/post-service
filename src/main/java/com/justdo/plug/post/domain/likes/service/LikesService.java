@@ -45,19 +45,17 @@ public class LikesService {
 
     }
 
-    /*
-    // 좋아요 취소
-    public String postLikeCancel(Long postId, Long memberId) {
-        Likes likepost = likeRepository.findByPostIdAndMemberId(postId, memberId);
+    public boolean isLike(Long memberId, Long postId) {
+        Likes liked = likeRepository.findByPostIdAndMemberId(postId, memberId);
 
-        try {
-            likeRepository.delete(likepost);
-            return "게시물 좋아요가 취소되었습니다.";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "게시물 좋아요 취소 중 오류가 발생했습니다: " + e.getMessage();
+        if (liked != null) {
+            return true;
         }
-
+        else{
+            return false;
+        }
     }
-     */
+
+
+
 }

@@ -8,6 +8,7 @@ import com.justdo.plug.post.domain.category.Category;
 import com.justdo.plug.post.domain.category.repository.CategoryRepository;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.likes.repository.LikesRepository;
+import com.justdo.plug.post.domain.likes.service.LikesService;
 import com.justdo.plug.post.domain.photo.Photo;
 import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
@@ -59,7 +60,6 @@ public class PostService {
     private final PostElasticsearchRepository postElasticsearchRepository;
     private final PhotoService photoService;
     private final BlogClient blogClient;
-    private final PostHashtagRepository postHashtagRepository;
     private final PhotoRepository photoRepository;
     private final CategoryRepository categoryRepository;
     private final LikesRepository likesRepository;
@@ -79,11 +79,11 @@ public class PostService {
     }
 
     // BLOG002: 게시글 상세 페이지 조회
-    public PostResponseDto getPostById(Long postId) throws JSONException {
+    public PostResponseDto getPostById(Long postId, Long memberId, boolean isLike) throws JSONException {
         Post post = postRepository.findById(postId)
             .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
-        return PostResponseDto.createFromPost(post);
+        return PostResponseDto.createFromPost(post, isLike);
     }
 
     // BLOG003: 블로그 작성

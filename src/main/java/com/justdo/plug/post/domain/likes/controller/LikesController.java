@@ -31,17 +31,5 @@ public class LikesController {
         return ApiResponse.onSuccess(likesService.postLike(postId, memberId));
 
     }
-    /*
-    // 게시글 좋아요 취소
-    @DeleteMapping("likes/{postId}")
-    @Operation(summary = "특정게시글 좋아요 취소 요청", description = "해당 게시글에 대해 좋아요를 취소합니다")
-    @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<String> LikeCancelPost(@PathVariable Long postId, HttpServletRequest request){
-
-        Long memberId = jwtProvider.getUserIdFromToken(request);
-        return ApiResponse.onSuccess(likesService.postLikeCancel(postId, memberId));
-
-    }
-    */
 
 }
