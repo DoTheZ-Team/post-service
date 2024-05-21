@@ -15,8 +15,8 @@ public class PostResponseDto {
     private int likeCount;
     private boolean temporaryState;
     private boolean state;
-    private LocalDateTime created_at;
-    private LocalDateTime updated_at;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private Long memberId;
     private Long blogId;
 
@@ -34,8 +34,8 @@ public class PostResponseDto {
                 .likeCount(post.getLikeCount())
                 .temporaryState(post.isTemporaryState())
                 .state(post.isState())
-                .created_at(post.getCreatedAt())
-                .updated_at(post.getUpdatedAt())
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
                 .memberId(post.getMemberId())
                 .blogId(post.getBlogId())
                 .build();
