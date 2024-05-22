@@ -42,7 +42,7 @@ public class PostController {
 
 
     // BLOG001: 게시글 리스트 조회 요청
-    @GetMapping
+    @GetMapping("all")
     @Operation(summary = "모든 게시글 리스트 조회 요청", description = "데이터 베이스 내에 있는 모든 게시글 리스트를 조회 합니다")
     public ApiResponse<List<Post>> ViewList() {
 
