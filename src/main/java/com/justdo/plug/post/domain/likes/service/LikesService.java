@@ -39,10 +39,7 @@ public class LikesService {
 
     private LikesResponse createLike(Post post, Long memberId) {
 
-        Likes newLike = Likes.builder()
-                .post(post)
-                .memberId(memberId)
-                .build();
+        Likes newLike = LikesResponse.toEntity(post, memberId);
         likeRepository.save(newLike);
         post.increaseLike();
 
