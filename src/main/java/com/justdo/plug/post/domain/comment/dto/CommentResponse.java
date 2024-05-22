@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Page;
 
 public class CommentResponse {
 
@@ -47,30 +47,37 @@ public class CommentResponse {
         @Schema(description = "댓글 데이터 목록")
         List<CommentItem> commentItems;
 
-        @Schema(description = "추가 조회할 목록이 있는지의 여부")
-        private Boolean hasNext;
+        @Schema(description = "페이징된 리스트의 항목 개수")
+        private Integer listSize;
 
-        @Schema(description = "첫 페이지인지 여부")
+        @Schema(description = "총 페이징 수")
+        private Integer totalPage;
+
+        @Schema(description = "전체 데이터의 개수")
+        private Long totalElements;
+
+        @Schema(description = "첫 페이지의 여부")
         private Boolean isFirst;
 
-        @Schema(description = "마지막 페이지인지 여부")
+        @Schema(description = "마지막 페이지의 여부")
         private Boolean isLast;
     }
 
-    public static CommentResult toCommentResult(Slice<Comment> commentSlice,
+    public static CommentResult toCommentResult(Page<Comment> commentPage,
             List<BlogInfo> blogInfoList) {
 
-        List<Comment> commentList = commentSlice.getContent();
-        System.out.println("commentList.size() = " + commentList.size());
+        List<Comment> commentList = commentPage.getContent();
         List<CommentItem> commentItems = IntStream.range(0, commentList.size())
                 .mapToObj(idx -> toCommentItem(commentList.get(idx), blogInfoList.get(idx)))
                 .toList();
 
         return CommentResult.builder()
                 .commentItems(commentItems)
-                .hasNext(commentSlice.hasNext())
-                .isFirst(commentSlice.isFirst())
-                .isLast(commentSlice.isLast())
+                .listSize(commentList.size())
+                .totalPage(commentPage.getTotalPages())
+                .totalElements(commentPage.getTotalElements())
+                .isFirst(commentPage.isFirst())
+                .isLast(commentPage.isLast())
                 .build();
     }
 
@@ -107,8 +114,6 @@ public class CommentResponse {
     }
 
     public static CommentItem toCommentItem(Comment comment, BlogInfo blogInfo) {
-
-        System.out.println("comment.getChildren() = " + comment.getChildren());
 
         return CommentItem.builder()
                 .memberId(comment.getMemberId())
