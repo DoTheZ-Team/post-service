@@ -15,8 +15,8 @@ import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,16 +84,16 @@ public class CommentService {
 
     public CommentResult findComments(Long postId, PageRequest pageRequest) {
 
-        Slice<Comment> commentSlice = commentRepository.findAllByPostIdAndParentCommentIsNull(
+        Page<Comment> commentPage = commentRepository.findAllByPostIdAndParentCommentIsNull(
                 postId, pageRequest);
 
-        List<Long> memberIdList = commentSlice.stream()
+        List<Long> memberIdList = commentPage.stream()
                 .map(Comment::getMemberId)
                 .toList();
-        List<BlogInfo> blogInfoList = findBlogInfoList(memberIdList);
-        System.out.println("blogInfoList.size() = " + blogInfoList.size());
 
-        return CommentResponse.toCommentResult(commentSlice, blogInfoList);
+        List<BlogInfo> blogInfoList = findBlogInfoList(memberIdList);
+
+        return CommentResponse.toCommentResult(commentPage, blogInfoList);
     }
 
     private List<BlogInfo> findBlogInfoList(List<Long> memberIdList) {
@@ -106,14 +106,14 @@ public class CommentService {
      */
     public CommentResult findChildComments(Long commentId, PageRequest pageRequest) {
 
-        Slice<Comment> commentSlice = commentRepository.findAllByParentCommentId(commentId,
+        Page<Comment> commentPage = commentRepository.findAllByParentCommentId(commentId,
                 pageRequest);
 
-        List<Long> memberIdList = commentSlice.stream()
+        List<Long> memberIdList = commentPage.stream()
                 .map(Comment::getMemberId)
                 .toList();
         List<BlogInfo> blogInfoList = findBlogInfoList(memberIdList);
 
-        return CommentResponse.toCommentResult(commentSlice, blogInfoList);
+        return CommentResponse.toCommentResult(commentPage, blogInfoList);
     }
 }
