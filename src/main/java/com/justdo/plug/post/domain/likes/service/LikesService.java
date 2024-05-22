@@ -11,13 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class LikesService {
     private final LikesRepository likeRepository;
     private final PostService postService;
 
     // 좋아요 등록
-    @Transactional
     public LikesResponse postLike(Long postId, Long memberId) {
 
         return likeRepository.findByPostIdAndMemberId(postId, memberId)
@@ -25,6 +24,7 @@ public class LikesService {
                 .orElseGet(()-> createLike(postService.getPost(postId), memberId));
     }
 
+    @Transactional(readOnly = true)
     public boolean isLike(Long memberId, Long postId) {
 
         return likeRepository.findByPostIdAndMemberId(postId, memberId).isPresent();
