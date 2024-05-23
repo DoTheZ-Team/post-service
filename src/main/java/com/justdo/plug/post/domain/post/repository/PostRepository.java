@@ -1,12 +1,9 @@
 package com.justdo.plug.post.domain.post.repository;
 
 import com.justdo.plug.post.domain.post.Post;
-import java.util.List;
-
-import java.util.Optional;
-
 import feign.Param;
-import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;

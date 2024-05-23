@@ -1,6 +1,7 @@
 package com.justdo.plug.post.domain.likes;
 
 import com.justdo.plug.post.domain.common.BaseTimeEntity;
+import com.justdo.plug.post.domain.post.Post;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +19,8 @@ public class Likes extends BaseTimeEntity {
     @Column(nullable = false)
     private Long memberId;
 
-    @Column(nullable = false)
-    private Long postId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
 }
