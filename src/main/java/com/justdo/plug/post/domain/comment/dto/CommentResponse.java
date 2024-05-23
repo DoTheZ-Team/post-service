@@ -121,7 +121,7 @@ public class CommentResponse {
                 .content(comment.getContent())
                 .blogProfile(blogInfo.getProfile())
                 .blogTitle(blogInfo.getTitle())
-                .createdAt(DateParser.dateTimeParse(LocalDateTime.now()))
+                .createdAt(DateParser.dateTimeParse(comment.getCreatedAt()))
                 .parentCommentId(
                         comment.getParentComment() != null ? comment.getParentComment().getId() : 0)
                 .hasChildComment(!comment.getChildren().isEmpty())
