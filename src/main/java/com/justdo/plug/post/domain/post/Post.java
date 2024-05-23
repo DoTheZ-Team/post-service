@@ -68,4 +68,12 @@ public class Post extends BaseTimeEntity {
     public void changePreview(String preview) {
         this.preview = preview;
     }
+
+    public void increaseLike() {
+        this.likeCount++;
+    }
+
+    public void decreaseLike() {
+        this.likeCount--;
+    }
 }

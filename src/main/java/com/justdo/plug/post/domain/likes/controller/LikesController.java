@@ -1,5 +1,6 @@
 package com.justdo.plug.post.domain.likes.controller;
 
+import com.justdo.plug.post.domain.likes.dto.LikesResponse;
 import com.justdo.plug.post.domain.likes.service.LikesService;
 import com.justdo.plug.post.global.response.ApiResponse;
 import com.justdo.plug.post.global.utils.JwtProvider;
@@ -24,7 +25,7 @@ public class LikesController {
     @PostMapping("likes/{postId}")
     @Operation(summary = "특정게시글 좋아요 삭제/생성 요청", description = "해당 게시글에 대해 좋아요를 누르지 않았다면 좋아요 생성, 이미 눌렀다면 좋아요 삭제를 합니다")
     @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<String> LikePost(@PathVariable Long postId, HttpServletRequest request){
+    public ApiResponse<LikesResponse> LikePost(@PathVariable Long postId, HttpServletRequest request){
 
 
         Long memberId = jwtProvider.getUserIdFromToken(request);
