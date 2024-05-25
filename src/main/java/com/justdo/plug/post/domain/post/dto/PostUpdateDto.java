@@ -1,13 +1,11 @@
 package com.justdo.plug.post.domain.post.dto;
 
-import lombok.Builder;
-import lombok.Data;
-
 import java.util.List;
+import lombok.Getter;
 
-@Data
-@Builder
+@Getter
 public class PostUpdateDto {
+
     private String title;
     private String content;
     private List<String> hashtags;

@@ -5,10 +5,15 @@ import com.justdo.plug.post.domain.category.service.CategoryService;
 import com.justdo.plug.post.domain.likes.service.LikesService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
-import com.justdo.plug.post.domain.post.dto.*;
+import com.justdo.plug.post.domain.post.dto.PostRequestDto;
+import com.justdo.plug.post.domain.post.dto.PostResponse;
+import com.justdo.plug.post.domain.post.dto.PostResponse.PostDetail;
+import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
+import com.justdo.plug.post.domain.post.dto.PreviewResponse;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.BlogPostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
+import com.justdo.plug.post.domain.post.dto.SearchResponse;
 import com.justdo.plug.post.domain.post.service.PostService;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.global.response.ApiResponse;
@@ -19,13 +24,20 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Post 게시글 관련 API입니다.")
 @RestController
@@ -54,12 +66,14 @@ public class PostController {
     @GetMapping("{postId}")
     @Operation(summary = "특정 게시글 상세 페이지 조회 요청", description = "특정 게시글의 상세 페이지를 요청합니다(제목, 글, 좋아요 갯수, 현재 사용자가 좋아요 했는지 여부 등)")
     @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<PostResponseDto> ViewPage(HttpServletRequest request, @PathVariable Long postId) throws JSONException {
+    public ApiResponse<PostResponse.PostDetailResult> ViewPage(HttpServletRequest request,
+            @PathVariable Long postId) throws JSONException {
 
         Long memberId = jwtProvider.getUserIdFromToken(request);
         boolean isLike = likesService.isLike(memberId, postId);
+        PostDetail postDetail = postService.getPostById(postId, memberId, isLike);
 
-        return ApiResponse.onSuccess(postService.getPostById(postId, memberId, isLike));
+        return ApiResponse.onSuccess(PostResponse.toPostDetailResult(memberId, postDetail));
 
     }
 

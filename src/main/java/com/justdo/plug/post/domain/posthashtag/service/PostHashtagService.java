@@ -44,7 +44,6 @@ public class PostHashtagService {
     @Transactional
     public void createHashtag(List<String> hashtags, Post post) {
 
-        System.out.println(hashtags);
         Optional.ofNullable(hashtags)
             .ifPresent(list -> list.forEach(hashtag -> {
 
@@ -215,7 +214,6 @@ public class PostHashtagService {
             docFields.put("memberId", memberId);
 
             jsonBody = objectMapper.writeValueAsString(docFields);
-            System.out.println("jsonBody = " + jsonBody);
             HttpRequest updateRequest = HttpRequest.newBuilder()
                     .uri(URI.create(updateURL))
                     .header("Content-Type", "application/json")

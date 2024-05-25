@@ -18,7 +18,7 @@ public class Post extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "postId")
+    @Column(name = "post_id")
     private Long id;
 
     @Column(nullable = false)
@@ -34,10 +34,6 @@ public class Post extends BaseTimeEntity {
     @Column(nullable = false)
     @Builder.Default
     private boolean temporaryState = false;
-
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean state = true;
 
     @Column(nullable = false)
     private Long blogId;
