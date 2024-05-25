@@ -5,8 +5,8 @@ import com.justdo.plug.post.domain.blog.BlogDto.BlogInfo;
 import com.justdo.plug.post.domain.comment.Comment;
 import com.justdo.plug.post.domain.comment.dto.CommentRequest;
 import com.justdo.plug.post.domain.comment.dto.CommentResponse;
+import com.justdo.plug.post.domain.comment.dto.CommentResponse.CommentItemList;
 import com.justdo.plug.post.domain.comment.dto.CommentResponse.CommentProc;
-import com.justdo.plug.post.domain.comment.dto.CommentResponse.CommentResult;
 import com.justdo.plug.post.domain.comment.dto.CommentVO;
 import com.justdo.plug.post.domain.comment.repository.CommentRepository;
 import com.justdo.plug.post.domain.post.Post;
@@ -82,7 +82,7 @@ public class CommentService {
         return CommentResponse.toCommentProc(comment);
     }
 
-    public CommentResult findComments(Long postId, PageRequest pageRequest) {
+    public CommentItemList findComments(Long postId, PageRequest pageRequest) {
 
         Page<Comment> commentPage = commentRepository.findAllByPostIdAndParentCommentIsNull(
                 postId, pageRequest);
@@ -93,7 +93,14 @@ public class CommentService {
 
         List<BlogInfo> blogInfoList = findBlogInfoList(memberIdList);
 
-        return CommentResponse.toCommentResult(commentPage, blogInfoList);
+        return CommentResponse.toCommentItemList(commentPage, blogInfoList, 0L);
+    }
+
+    private List<Long> getCommentIds(Page<Comment> commentPage) {
+
+        return commentPage.stream()
+                .map(Comment::getId)
+                .toList();
     }
 
     private List<BlogInfo> findBlogInfoList(List<Long> memberIdList) {
@@ -104,9 +111,9 @@ public class CommentService {
     /**
      * Child Comment 조회
      */
-    public CommentResult findChildComments(Long commentId, PageRequest pageRequest) {
+    public CommentItemList findChildComments(Long parentId, PageRequest pageRequest) {
 
-        Page<Comment> commentPage = commentRepository.findAllByParentCommentId(commentId,
+        Page<Comment> commentPage = commentRepository.findAllByParentCommentId(parentId,
                 pageRequest);
 
         List<Long> memberIdList = commentPage.stream()
@@ -114,6 +121,6 @@ public class CommentService {
                 .toList();
         List<BlogInfo> blogInfoList = findBlogInfoList(memberIdList);
 
-        return CommentResponse.toCommentResult(commentPage, blogInfoList);
+        return CommentResponse.toCommentItemList(commentPage, blogInfoList, parentId);
     }
 }

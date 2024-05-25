@@ -2,6 +2,7 @@ package com.justdo.plug.post.domain.comment.controller;
 
 import com.justdo.plug.post.domain.comment.dto.CommentRequest;
 import com.justdo.plug.post.domain.comment.dto.CommentResponse;
+import com.justdo.plug.post.domain.comment.dto.CommentResponse.CommentItemList;
 import com.justdo.plug.post.domain.comment.dto.CommentResponse.CommentProc;
 import com.justdo.plug.post.domain.comment.dto.CommentVO;
 import com.justdo.plug.post.domain.comment.service.CommentService;
@@ -42,13 +43,18 @@ public class CommentController {
             @Parameter(name = "size", description = "페이징 크기 size, Query String입니다.", in = ParameterIn.QUERY)
     })
     @GetMapping("/{postId}")
-    public ApiResponse<CommentResponse.CommentResult> getComments(@PathVariable Long postId,
+    public ApiResponse<CommentResponse.CommentResult> getComments(HttpServletRequest request,
+            @PathVariable Long postId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
 
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt"));
+        Long loginMemberId = jwtProvider.getUserIdFromToken(request);
 
-        return ApiResponse.onSuccess(commentService.findComments(postId, pageRequest));
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        CommentItemList commentItemList = commentService.findComments(postId, pageRequest);
+
+        return ApiResponse.onSuccess(
+                CommentResponse.toCommentResult(loginMemberId, commentItemList));
     }
 
     @Operation(summary = "댓글 조회 페이지 - 게시글에 작성된 특정 댓글의 자식 댓글 조회 API", description = "Post의 자식 Comment 목록을 조회합니다.")
@@ -57,13 +63,16 @@ public class CommentController {
             @Parameter(name = "size", description = "페이징 크기 size, Query String입니다.", in = ParameterIn.QUERY)
     })
     @GetMapping("/childs/{commentId}")
-    public ApiResponse<CommentResponse.CommentResult> getChildComments(@PathVariable Long commentId,
+    public ApiResponse<CommentResponse.CommentResult> getChildComments(HttpServletRequest request,
+            @PathVariable Long commentId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
 
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt"));
+        Long loginMemberId = jwtProvider.getUserIdFromToken(request);
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        CommentItemList commentItemList = commentService.findChildComments(commentId, pageRequest);
 
-        return ApiResponse.onSuccess(commentService.findChildComments(commentId, pageRequest));
+        return ApiResponse.onSuccess(CommentResponse.toCommentResult(loginMemberId, commentItemList));
     }
 
     @Operation(summary = "댓글 작성 페이지 - 게시글에 댓글 작성 API", description = "Post의 Comment를 작성합니다.")
