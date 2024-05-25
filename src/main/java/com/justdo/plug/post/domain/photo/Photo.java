@@ -22,7 +22,8 @@ public class Photo extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long photoId;
+    @Column(name = "photo_id")
+    private Long id;
 
     @Column
     private String photoUrl;
