@@ -37,12 +37,30 @@ public class CommentResponse {
                 .build();
     }
 
+    @Schema(description = "로그인한 사용자 정보 & 댓글 목록 응답 DTO")
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class CommentResult {
+
+        @Schema(description = "로그인한 사용자의 ID")
+        private Long loginMemberId;
+
+        private CommentItemList commentItemList;
+
+    }
+
+    public static CommentResult toCommentResult(Long loginMemberId, CommentItemList commentItemList) {
+
+        return new CommentResult(loginMemberId, commentItemList);
+    }
+
     @Schema(description = "댓글 목록 응답 DTO")
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter
-    public static class CommentResult {
+    public static class CommentItemList {
 
         @Schema(description = "댓글 데이터 목록")
         List<CommentItem> commentItems;
@@ -63,15 +81,15 @@ public class CommentResponse {
         private Boolean isLast;
     }
 
-    public static CommentResult toCommentResult(Page<Comment> commentPage,
-            List<BlogInfo> blogInfoList) {
+    public static CommentItemList toCommentItemList(Page<Comment> commentPage,
+            List<BlogInfo> blogInfoList, Long parentId) {
 
         List<Comment> commentList = commentPage.getContent();
         List<CommentItem> commentItems = IntStream.range(0, commentList.size())
-                .mapToObj(idx -> toCommentItem(commentList.get(idx), blogInfoList.get(idx)))
+                .mapToObj(idx -> toCommentItem(commentList.get(idx), blogInfoList.get(idx), parentId))
                 .toList();
 
-        return CommentResult.builder()
+        return CommentItemList.builder()
                 .commentItems(commentItems)
                 .listSize(commentList.size())
                 .totalPage(commentPage.getTotalPages())
@@ -113,7 +131,7 @@ public class CommentResponse {
         private Boolean hasChildComment;
     }
 
-    public static CommentItem toCommentItem(Comment comment, BlogInfo blogInfo) {
+    public static CommentItem toCommentItem(Comment comment, BlogInfo blogInfo, Long parentId) {
 
         return CommentItem.builder()
                 .memberId(comment.getMemberId())
@@ -122,8 +140,7 @@ public class CommentResponse {
                 .blogProfile(blogInfo.getProfile())
                 .blogTitle(blogInfo.getTitle())
                 .createdAt(DateParser.dateTimeParse(comment.getCreatedAt()))
-                .parentCommentId(
-                        comment.getParentComment() != null ? comment.getParentComment().getId() : 0)
+                .parentCommentId(parentId)
                 .hasChildComment(!comment.getChildren().isEmpty())
                 .build();
     }

@@ -3,6 +3,7 @@ package com.justdo.plug.post.domain.posthashtag;
 import com.justdo.plug.post.domain.common.BaseTimeEntity;
 import com.justdo.plug.post.domain.hashtag.Hashtag;
 import com.justdo.plug.post.domain.post.Post;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -24,7 +25,8 @@ public class PostHashtag extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long postHashtagId;
+    @Column(name = "post_hashtag_id")
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)

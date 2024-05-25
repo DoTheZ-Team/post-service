@@ -23,6 +23,7 @@ public class Hashtag extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "hashtag_id")
     private Long id;
 
     @Column(nullable = false)

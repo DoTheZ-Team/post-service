@@ -14,7 +14,7 @@ import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
-import com.justdo.plug.post.domain.post.dto.PostResponseDto;
+import com.justdo.plug.post.domain.post.dto.PostResponse;
 import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
@@ -85,20 +85,19 @@ public class PostService {
     }
 
     // BLOG002: 게시글 상세 페이지 조회
-    public PostResponseDto getPostById(Long postId, Long memberId, boolean isLike)
+    public PostResponse.PostDetail getPostById(Long postId, Long memberId, boolean isLike)
             throws JSONException {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ApiException(ErrorStatus._POST_NOT_FOUND));
 
         Long blogId = post.getBlogId();
 
-        SubscriptionRequest.LoginSubscription loginSubscription = new SubscriptionRequest.LoginSubscription();
-        loginSubscription.setMemberId(memberId);
-        loginSubscription.setBlogId(blogId);
+        SubscriptionRequest.LoginSubscription loginSubscription = new SubscriptionRequest.LoginSubscription(
+                memberId, blogId);
 
         boolean isSubscribe = blogClient.checkSubscribeById(loginSubscription);
 
-        return PostResponseDto.createFromPost(post, isLike, isSubscribe);
+        return PostResponse.toPostDetail(post, isLike, isSubscribe);
     }
 
     // BLOG003: 블로그 작성
@@ -308,9 +307,6 @@ public class PostService {
         return null;
     }
 
-    /**
-     * Elastic Search Post Document 생성
-     */
     @Transactional
     public String savePostIndex(Post post) {
         PostDocument postDocument = PostDocument.toDocument(post);

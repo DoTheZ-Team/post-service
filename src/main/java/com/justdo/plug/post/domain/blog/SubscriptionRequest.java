@@ -1,13 +1,14 @@
 package com.justdo.plug.post.domain.blog;
+
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 public class SubscriptionRequest {
 
     @Schema(description = "로그인한 사용자의 정보와 블로그의 정보 DTO")
-    @Getter
-    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class LoginSubscription {
 
         @Schema(description = "로그인한 사용자의 아이디")

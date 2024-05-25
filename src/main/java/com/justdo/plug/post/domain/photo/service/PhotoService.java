@@ -4,42 +4,42 @@ import com.justdo.plug.post.domain.photo.Photo;
 import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PhotoService {
 
     private final PhotoRepository photoRepository;
 
+    @Transactional
     public void createPhoto(List<String> photoUrls, Post post) {
 
         Optional.ofNullable(photoUrls)
-            .ifPresent(list -> list.forEach(photoUrl -> {
-                photoRepository.save(new Photo(photoUrl, post));
-            }));
+                .ifPresent(list -> list.forEach(photoUrl -> {
+                    photoRepository.save(new Photo(photoUrl, post));
+                }));
     }
 
     public String findPhotoByPostId(Long postId) {
 
         return photoRepository.findFirstByPostId(postId)
-            .map(Photo::getPhotoUrl)
-            .orElse(null);
+                .map(Photo::getPhotoUrl)
+                .orElse(null);
 
     }
 
     public List<String> findPhotoUrlsByPosts(List<Post> posts) {
 
         return posts.stream()
-            .map(post -> findPhotoByPostId(post.getId()))
-            .toList();
+                .map(post -> findPhotoByPostId(post.getId()))
+                .toList();
     }
 
     @Transactional
