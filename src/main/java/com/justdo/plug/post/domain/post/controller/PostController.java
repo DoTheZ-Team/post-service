@@ -136,16 +136,6 @@ public class PostController {
         return postHashtagService.getHashtags(memberId);
     }
 
-    // BlOG008: 게시글의 글만 조회하기
-    @GetMapping("previews/{postId}")
-    @Operation(summary = "특정게시글의 미리보기(글만) 요청", description = "글 내의 JS 값들을 제외한 글만 조회하는 API입니다")
-    @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<String> PreviewPost(@PathVariable Long postId)
-            throws JsonProcessingException {
-
-        return ApiResponse.onSuccess(postService.getPreviewPost(postId));
-
-    }
 
     @Operation(summary = "내가 구독하는 블로그 (구독 페이지) - Open Feign을 통해 사용되는 API입니다.", description = "Post 미리보기에서 내가 구독한 사용자 Post 조회 요청")
     @PostMapping("previews/subscriptions")
