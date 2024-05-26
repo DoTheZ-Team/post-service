@@ -7,6 +7,7 @@ import com.justdo.plug.post.domain.blog.BlogClient;
 import com.justdo.plug.post.domain.blog.SubscriptionRequest;
 import com.justdo.plug.post.domain.category.Category;
 import com.justdo.plug.post.domain.category.repository.CategoryRepository;
+import com.justdo.plug.post.domain.category.service.CategoryService;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.likes.repository.LikesRepository;
 import com.justdo.plug.post.domain.photo.Photo;
@@ -39,10 +40,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,6 +68,7 @@ public class PostService {
     private final PhotoRepository photoRepository;
     private final CategoryRepository categoryRepository;
     private final LikesRepository likesRepository;
+    private final CategoryService categoryService;
 
 
     @Value("${spring.elasticsearch.uris}")
@@ -92,12 +92,18 @@ public class PostService {
 
         Long blogId = post.getBlogId();
 
+        List<String> postHashtags = postHashtagService.getPostHashtagNames(postId);
+
+        String categoryName = categoryService.getHashtags(postId);
+
+        List<String> photoUrls = photoService.findPhotoUrlsByPostId(postId);
+
         SubscriptionRequest.LoginSubscription loginSubscription = new SubscriptionRequest.LoginSubscription(
                 memberId, blogId);
 
         boolean isSubscribe = blogClient.checkSubscribeById(loginSubscription);
 
-        return PostResponse.toPostDetail(post, isLike, isSubscribe);
+        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls);
     }
 
     // BLOG003: 블로그 작성

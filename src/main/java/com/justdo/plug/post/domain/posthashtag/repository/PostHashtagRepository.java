@@ -18,4 +18,5 @@ public interface PostHashtagRepository extends JpaRepository<PostHashtag, Long>{
 
     @Transactional
     void deleteByPost(Post post);
+
 }
