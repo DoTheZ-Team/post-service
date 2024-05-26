@@ -5,9 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.blog.BlogClient;
 import com.justdo.plug.post.domain.blog.SubscriptionRequest;
-import com.justdo.plug.post.domain.category.Category;
-import com.justdo.plug.post.domain.category.repository.CategoryRepository;
-import com.justdo.plug.post.domain.category.service.CategoryService;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.likes.repository.LikesRepository;
 import com.justdo.plug.post.domain.photo.Photo;
@@ -66,9 +63,7 @@ public class PostService {
     private final PhotoService photoService;
     private final BlogClient blogClient;
     private final PhotoRepository photoRepository;
-    private final CategoryRepository categoryRepository;
     private final LikesRepository likesRepository;
-    private final CategoryService categoryService;
 
 
     @Value("${spring.elasticsearch.uris}")
@@ -94,7 +89,7 @@ public class PostService {
 
         List<String> postHashtags = postHashtagService.getPostHashtagNames(postId);
 
-        String categoryName = categoryService.getHashtags(postId);
+        String categoryName = post.getCategoryName();
 
         List<String> photoUrls = photoService.findPhotoUrlsByPostId(postId);
 
@@ -102,6 +97,8 @@ public class PostService {
                 memberId, blogId);
 
         boolean isSubscribe = blogClient.checkSubscribeById(loginSubscription);
+
+
 
         return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls);
     }
@@ -337,8 +334,6 @@ public class PostService {
             photoRepository.deleteAll(photos);
         }
 
-        categoryRepository.deleteByPost(post);
-
         likesRepository.deleteByPostId(postId);
 
         // 찾은 Post 삭제
@@ -413,9 +408,8 @@ public class PostService {
         String esId = post.getEsId();
 
         // 카테고리 변경
-        Category category = categoryRepository.findByPostId(postId)
-                .orElseThrow(() -> new ApiException(ErrorStatus._CATEGORY_NOT_FOUND));
-        category.changeName(updateDto.getCategoryName());
+        String categoryName = updateDto.getCategoryName();
+        post.changeCategory(categoryName);
 
         // 해시태그 변경
         List<String> hashtags = updateDto.getHashtags();

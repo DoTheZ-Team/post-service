@@ -1,7 +1,6 @@
 package com.justdo.plug.post.domain.post.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.justdo.plug.post.domain.category.service.CategoryService;
 import com.justdo.plug.post.domain.likes.service.LikesService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
@@ -47,7 +46,6 @@ public class PostController {
 
     private final PostHashtagService postHashtagService;
     private final PostService postService;
-    private final CategoryService categoryService;
     private final PhotoService photoService;
     private final JwtProvider jwtProvider;
     private final LikesService likesService;
@@ -93,13 +91,10 @@ public class PostController {
         // 2. Post_Hashtag 저장
         postHashtagService.createHashtag(requestDto.getHashtags(), post);
 
-        // 3. Category 저장
-        categoryService.createCategory(requestDto.getCategoryName(), post);
-
-        // 4. Photo 저장
+        // 3. Photo 저장
         photoService.createPhoto(requestDto.getPhotoUrls(), post);
 
-        // 5. Recommend Service 로 해시태그 보내주기
+        // 4. Recommend Service 로 해시태그 보내주기
         postHashtagService.sendNewHashtags(memberId, requestDto.getHashtags(), request);
 
         return ApiResponse.onSuccess("게시글이 성공적으로 업로드 되었습니다");

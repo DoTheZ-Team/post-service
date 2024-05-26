@@ -47,6 +47,9 @@ public class Post extends BaseTimeEntity {
     @Column
     private String esId;
 
+    @Column
+    private String categoryName;
+
     // 필드 값 변경을 위한 메서드
     public void changeEsId(String esId) {
         this.esId = esId;
@@ -71,5 +74,9 @@ public class Post extends BaseTimeEntity {
 
     public void decreaseLike() {
         this.likeCount--;
+    }
+
+    public void changeCategory(String categoryName){
+        this.categoryName = categoryName;
     }
 }
