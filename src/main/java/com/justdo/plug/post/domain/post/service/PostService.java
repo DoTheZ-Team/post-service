@@ -26,6 +26,9 @@ import com.justdo.plug.post.domain.post.dto.SearchResponse.SearchInfo;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
+import com.justdo.plug.post.domain.sticker.PostStickerDTO;
+import com.justdo.plug.post.domain.sticker.StickerClient;
+import com.justdo.plug.post.domain.sticker.PostStickerDTO;
 import com.justdo.plug.post.elastic.PostDocument;
 import com.justdo.plug.post.elastic.PostElasticsearchRepository;
 import com.justdo.plug.post.global.exception.ApiException;
@@ -62,6 +65,7 @@ public class PostService {
     private final PostElasticsearchRepository postElasticsearchRepository;
     private final PhotoService photoService;
     private final BlogClient blogClient;
+    private final StickerClient stickerClient;
     private final PhotoRepository photoRepository;
     private final LikesRepository likesRepository;
 
@@ -99,8 +103,11 @@ public class PostService {
         boolean isSubscribe = blogClient.checkSubscribeById(loginSubscription);
 
 
+        PostStickerDTO.PostStickerUrlItems postStickerUrlItems = stickerClient.getStickers(postId);
+        System.out.println("postStickerUrlItem = " + postStickerUrlItems);
 
-        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls);
+
+        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls, postStickerUrlItems);
     }
 
     // BLOG003: 블로그 작성

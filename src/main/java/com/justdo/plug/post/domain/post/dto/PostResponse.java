@@ -1,6 +1,7 @@
 package com.justdo.plug.post.domain.post.dto;
 
 import com.justdo.plug.post.domain.post.Post;
+import com.justdo.plug.post.domain.sticker.PostStickerDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -80,11 +81,14 @@ public class PostResponse {
 
         @Schema(description = "포스트의 이미지 경로")
         private List<String> photoUrls;
+
+        @Schema(description = "포스트의 스티커 정보")
+        PostStickerDTO.PostStickerUrlItems postStickerUrlItems;
     }
 
     // SUB: 게시글 반환 함수
     public static PostResponse.PostDetail toPostDetail(Post post, boolean isLike,
-            boolean isSubscribe, List<String> postHashtags, String categoryName, List<String> photoUrls) {
+            boolean isSubscribe, List<String> postHashtags, String categoryName, List<String> photoUrls, PostStickerDTO.PostStickerUrlItems postStickerUrlItems) {
 
         String JsonContent = post.getContent();
         JSONArray jsonArray = new JSONArray(JsonContent);
@@ -106,6 +110,7 @@ public class PostResponse {
                 .postHashtags(postHashtags)
                 .categoryName(categoryName)
                 .photoUrls(photoUrls)
+                .postStickerUrlItems(postStickerUrlItems)
                 .build();
 
     }
