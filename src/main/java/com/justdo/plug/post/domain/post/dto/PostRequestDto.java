@@ -21,6 +21,7 @@ public class PostRequestDto {
                 .content(postRequestDto.getContent())
                 .temporaryState(postRequestDto.temporaryState)
                 .memberId(memberId)
+                .categoryName(postRequestDto.getCategoryName())
                 .blogId(blogId)
                 .preview(preview)
                 .build();

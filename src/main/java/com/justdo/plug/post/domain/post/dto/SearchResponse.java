@@ -36,7 +36,17 @@ public class SearchResponse {
         @Schema(description = "ES 관련 데이터")
         private String _class;
 
+        @Schema(description = "사용된 해시태그")
         private List<String> hashtags;
+
+        @Schema(description = "사용된 이미지 주소")
+        private List<String> photoUrl;
+
+        @Schema(description = "Post이 카테고리")
+        private String categoryName;
+
+        @Schema(description = "Post 내용")
+        private String content;
 
     }
 

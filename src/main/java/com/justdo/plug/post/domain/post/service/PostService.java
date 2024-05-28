@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.blog.BlogClient;
 import com.justdo.plug.post.domain.blog.SubscriptionRequest;
-import com.justdo.plug.post.domain.category.Category;
-import com.justdo.plug.post.domain.category.repository.CategoryRepository;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.likes.repository.LikesRepository;
 import com.justdo.plug.post.domain.photo.Photo;
@@ -28,6 +26,9 @@ import com.justdo.plug.post.domain.post.dto.SearchResponse.SearchInfo;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
+import com.justdo.plug.post.domain.sticker.PostStickerDTO;
+import com.justdo.plug.post.domain.sticker.StickerClient;
+import com.justdo.plug.post.domain.sticker.PostStickerDTO;
 import com.justdo.plug.post.elastic.PostDocument;
 import com.justdo.plug.post.elastic.PostElasticsearchRepository;
 import com.justdo.plug.post.global.exception.ApiException;
@@ -39,10 +40,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,8 +65,8 @@ public class PostService {
     private final PostElasticsearchRepository postElasticsearchRepository;
     private final PhotoService photoService;
     private final BlogClient blogClient;
+    private final StickerClient stickerClient;
     private final PhotoRepository photoRepository;
-    private final CategoryRepository categoryRepository;
     private final LikesRepository likesRepository;
 
 
@@ -92,12 +91,23 @@ public class PostService {
 
         Long blogId = post.getBlogId();
 
+        List<String> postHashtags = postHashtagService.getPostHashtagNames(postId);
+
+        String categoryName = post.getCategoryName();
+
+        List<String> photoUrls = photoService.findPhotoUrlsByPostId(postId);
+
         SubscriptionRequest.LoginSubscription loginSubscription = new SubscriptionRequest.LoginSubscription(
                 memberId, blogId);
 
         boolean isSubscribe = blogClient.checkSubscribeById(loginSubscription);
 
-        return PostResponse.toPostDetail(post, isLike, isSubscribe);
+
+        PostStickerDTO.PostStickerUrlItems postStickerUrlItems = stickerClient.getStickers(postId);
+        System.out.println("postStickerUrlItem = " + postStickerUrlItems);
+
+
+        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls, postStickerUrlItems);
     }
 
     // BLOG003: 블로그 작성
@@ -331,8 +341,6 @@ public class PostService {
             photoRepository.deleteAll(photos);
         }
 
-        categoryRepository.deleteByPost(post);
-
         likesRepository.deleteByPostId(postId);
 
         // 찾은 Post 삭제
@@ -407,9 +415,8 @@ public class PostService {
         String esId = post.getEsId();
 
         // 카테고리 변경
-        Category category = categoryRepository.findByPostId(postId)
-                .orElseThrow(() -> new ApiException(ErrorStatus._CATEGORY_NOT_FOUND));
-        category.changeName(updateDto.getCategoryName());
+        String categoryName = updateDto.getCategoryName();
+        post.changeCategory(categoryName);
 
         // 해시태그 변경
         List<String> hashtags = updateDto.getHashtags();

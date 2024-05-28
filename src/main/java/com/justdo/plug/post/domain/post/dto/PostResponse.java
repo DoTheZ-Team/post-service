@@ -1,9 +1,11 @@
 package com.justdo.plug.post.domain.post.dto;
 
 import com.justdo.plug.post.domain.post.Post;
+import com.justdo.plug.post.domain.sticker.PostStickerDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -70,18 +72,30 @@ public class PostResponse {
 
         @Schema(description = "로그인 사용자에 따른 포스트 구독 여부 ")
         private Boolean isSubscribe;
+
+        @Schema(description = "포스트의 해시태그 값")
+        private List<String> postHashtags;
+
+        @Schema(description = "포스트의 카테고리 값")
+        private String categoryName;
+
+        @Schema(description = "포스트의 이미지 경로")
+        private List<String> photoUrls;
+
+        @Schema(description = "포스트의 스티커 정보")
+        PostStickerDTO.PostStickerUrlItems postStickerUrlItems;
     }
 
     // SUB: 게시글 반환 함수
     public static PostResponse.PostDetail toPostDetail(Post post, boolean isLike,
-            boolean isSubscribe) {
+            boolean isSubscribe, List<String> postHashtags, String categoryName, List<String> photoUrls, PostStickerDTO.PostStickerUrlItems postStickerUrlItems) {
 
         String JsonContent = post.getContent();
         JSONArray jsonArray = new JSONArray(JsonContent);
         List<Object> list = jsonArray.toList();
         Object[] array = list.toArray();
 
-        return PostResponse.PostDetail.builder()
+        return PostDetail.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(array)
@@ -93,6 +107,10 @@ public class PostResponse {
                 .blogId(post.getBlogId())
                 .isLike(isLike)
                 .isSubscribe(isSubscribe)
+                .postHashtags(postHashtags)
+                .categoryName(categoryName)
+                .photoUrls(photoUrls)
+                .postStickerUrlItems(postStickerUrlItems)
                 .build();
 
     }
