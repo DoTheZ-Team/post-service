@@ -4,4 +4,3 @@
 Elastic Search를 통한 검색 서비스 제공
 
 GCP 변경
-KAKAO Mysql로 변경 예정
