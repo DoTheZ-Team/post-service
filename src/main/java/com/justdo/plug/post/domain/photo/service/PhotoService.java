@@ -4,6 +4,8 @@ import com.justdo.plug.post.domain.photo.Photo;
 import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,6 +42,19 @@ public class PhotoService {
         return posts.stream()
                 .map(post -> findPhotoByPostId(post.getId()))
                 .toList();
+    }
+
+    public List<String> findPhotoUrlsByPostId(Long postId) {
+
+        List<Photo> photos = photoRepository.findAllByPostId(postId);
+        List<String> photoUrls = new ArrayList<>();
+
+        for (Photo photo : photos) {
+            String photoUrl = photo.getPhotoUrl();
+            photoUrls.add(photoUrl);
+        }
+
+        return photoUrls;
     }
 
     @Transactional

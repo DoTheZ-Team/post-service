@@ -143,6 +143,24 @@ public class PostHashtagService {
         return postHashtagRepository.findByPostId(postId);
     }
 
+    public List<String> getPostHashtagNames(Long postId) {
+        List<PostHashtag> postHashtags = postHashtagRepository.findByPostId(postId);
+        List<Hashtag> hashtags = new ArrayList<>();
+        for (PostHashtag postHashtag : postHashtags) {
+            Hashtag hashtag = postHashtag.getHashtag();
+            hashtags.add(hashtag);
+        }
+
+        List<String> hashtagNames = new ArrayList<>();
+        for (Hashtag hashtag : hashtags) {
+            String hashtagName = hashtag.getName();
+            hashtagNames.add(hashtagName);
+        }
+
+        return hashtagNames;
+    }
+
+
     public void save(PostHashtag postHashtag) {
         postHashtagRepository.save(postHashtag);
     }

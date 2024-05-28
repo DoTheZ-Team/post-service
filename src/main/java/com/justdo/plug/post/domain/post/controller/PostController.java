@@ -1,7 +1,6 @@
 package com.justdo.plug.post.domain.post.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.justdo.plug.post.domain.category.service.CategoryService;
 import com.justdo.plug.post.domain.likes.service.LikesService;
 import com.justdo.plug.post.domain.photo.service.PhotoService;
 import com.justdo.plug.post.domain.post.Post;
@@ -47,7 +46,6 @@ public class PostController {
 
     private final PostHashtagService postHashtagService;
     private final PostService postService;
-    private final CategoryService categoryService;
     private final PhotoService photoService;
     private final JwtProvider jwtProvider;
     private final LikesService likesService;
@@ -93,13 +91,10 @@ public class PostController {
         // 2. Post_Hashtag 저장
         postHashtagService.createHashtag(requestDto.getHashtags(), post);
 
-        // 3. Category 저장
-        categoryService.createCategory(requestDto.getCategoryName(), post);
-
-        // 4. Photo 저장
+        // 3. Photo 저장
         photoService.createPhoto(requestDto.getPhotoUrls(), post);
 
-        // 5. Recommend Service 로 해시태그 보내주기
+        // 4. Recommend Service 로 해시태그 보내주기
         postHashtagService.sendNewHashtags(memberId, requestDto.getHashtags(), request);
 
         return ApiResponse.onSuccess("게시글이 성공적으로 업로드 되었습니다");
@@ -141,16 +136,6 @@ public class PostController {
         return postHashtagService.getHashtags(memberId);
     }
 
-    // BlOG008: 게시글의 글만 조회하기
-    @GetMapping("previews/{postId}")
-    @Operation(summary = "특정게시글의 미리보기(글만) 요청", description = "글 내의 JS 값들을 제외한 글만 조회하는 API입니다")
-    @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<String> PreviewPost(@PathVariable Long postId)
-            throws JsonProcessingException {
-
-        return ApiResponse.onSuccess(postService.getPreviewPost(postId));
-
-    }
 
     @Operation(summary = "내가 구독하는 블로그 (구독 페이지) - Open Feign을 통해 사용되는 API입니다.", description = "Post 미리보기에서 내가 구독한 사용자 Post 조회 요청")
     @PostMapping("previews/subscriptions")
