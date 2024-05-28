@@ -47,6 +47,7 @@ public class Comment extends BaseTimeEntity {
     private Comment parentComment;
 
     @OneToMany(mappedBy = "parentComment", orphanRemoval = true, cascade = CascadeType.ALL)
+    @Default
     private List<Comment> children = new ArrayList<>();
 
     /**
