@@ -10,4 +10,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findAllByPostIdAndParentCommentIsNull(Long postId, PageRequest pageRequest);
 
     Page<Comment> findAllByParentCommentId(Long parentId, PageRequest pageRequest);
+
+    void deleteByPostId(Long postId);
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.blog.BlogClient;
 import com.justdo.plug.post.domain.blog.SubscriptionRequest;
+import com.justdo.plug.post.domain.comment.repository.CommentRepository;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.likes.repository.LikesRepository;
 import com.justdo.plug.post.domain.photo.Photo;
@@ -68,6 +69,7 @@ public class PostService {
     private final StickerClient stickerClient;
     private final PhotoRepository photoRepository;
     private final LikesRepository likesRepository;
+    private final CommentRepository commentRepository;
 
 
     @Value("${spring.elasticsearch.uris}")
@@ -343,6 +345,9 @@ public class PostService {
 
         likesRepository.deleteByPostId(postId);
 
+        commentRepository.deleteByPostId(postId);
+
+        postElasticsearchRepository.deleteById(esId);
         // 찾은 Post 삭제
         postRepository.deleteByEsId(esId);
 
