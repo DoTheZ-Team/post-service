@@ -3,6 +3,7 @@ package com.justdo.plug.post.domain.post.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.justdo.plug.post.domain.auth.AuthClient;
 import com.justdo.plug.post.domain.blog.BlogClient;
 import com.justdo.plug.post.domain.blog.SubscriptionRequest;
 import com.justdo.plug.post.domain.comment.repository.CommentRepository;
@@ -29,7 +30,6 @@ import com.justdo.plug.post.domain.posthashtag.PostHashtag;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.domain.sticker.PostStickerDTO;
 import com.justdo.plug.post.domain.sticker.StickerClient;
-import com.justdo.plug.post.domain.sticker.PostStickerDTO;
 import com.justdo.plug.post.elastic.PostDocument;
 import com.justdo.plug.post.elastic.PostElasticsearchRepository;
 import com.justdo.plug.post.global.exception.ApiException;
@@ -66,6 +66,7 @@ public class PostService {
     private final PostElasticsearchRepository postElasticsearchRepository;
     private final PhotoService photoService;
     private final BlogClient blogClient;
+    private final AuthClient authClient;
     private final StickerClient stickerClient;
     private final PhotoRepository photoRepository;
     private final LikesRepository likesRepository;
@@ -105,11 +106,14 @@ public class PostService {
         boolean isSubscribe = blogClient.checkSubscribeById(loginSubscription);
 
 
+        String nickname = authClient.getMemberName(memberId);
+
+
         PostStickerDTO.PostStickerUrlItems postStickerUrlItems = stickerClient.getStickers(postId);
         System.out.println("postStickerUrlItem = " + postStickerUrlItems);
 
 
-        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls, postStickerUrlItems);
+        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls, postStickerUrlItems, nickname);
     }
 
     // BLOG003: 블로그 작성
@@ -365,11 +369,8 @@ public class PostService {
             HttpResponse<String> deleteResponse = client.send(deleteRequest,
                     HttpResponse.BodyHandlers.ofString());
 
-            if (deleteResponse.statusCode() == 200) {
-                return "게시글이 삭제되었습니다.";
-            } else {
-                return "게시글 삭제도중 오류가 발생하였습니다: " + deleteResponse.statusCode();
-            }
+            return "게시글이 삭제되었습니다.";
+
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             return e.toString();

@@ -40,6 +40,9 @@ public class PostResponse {
     @AllArgsConstructor
     public static class PostDetail {
 
+        @Schema(description = "사용자 nickname")
+        private String nickname;
+
         @Schema(description = "포스트 ID")
         private Long postId;
 
@@ -84,11 +87,12 @@ public class PostResponse {
 
         @Schema(description = "포스트의 스티커 정보")
         PostStickerDTO.PostStickerUrlItems postStickerUrlItems;
+
     }
 
     // SUB: 게시글 반환 함수
     public static PostResponse.PostDetail toPostDetail(Post post, boolean isLike,
-            boolean isSubscribe, List<String> postHashtags, String categoryName, List<String> photoUrls, PostStickerDTO.PostStickerUrlItems postStickerUrlItems) {
+            boolean isSubscribe, List<String> postHashtags, String categoryName, List<String> photoUrls, PostStickerDTO.PostStickerUrlItems postStickerUrlItems, String nickname) {
 
         String JsonContent = post.getContent();
         JSONArray jsonArray = new JSONArray(JsonContent);
@@ -96,6 +100,7 @@ public class PostResponse {
         Object[] array = list.toArray();
 
         return PostDetail.builder()
+                .nickname(nickname)
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(array)
