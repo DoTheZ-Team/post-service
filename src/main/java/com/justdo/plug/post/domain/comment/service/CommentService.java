@@ -123,4 +123,8 @@ public class CommentService {
 
         return CommentResponse.toCommentItemList(commentPage, blogInfoList, parentId);
     }
+
+    public void deleteComments(Long postId) {
+        commentRepository.deleteByPostId(postId);
+    }
 }

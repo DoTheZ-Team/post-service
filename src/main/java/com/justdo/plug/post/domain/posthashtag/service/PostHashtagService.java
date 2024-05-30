@@ -33,10 +33,9 @@ public class PostHashtagService {
     private final PostRepository postRepository;
     private final JwtProvider jwtProvider;
 
-    @Value("${elasticsearch.api-key}")
-    private String apiKey;
 
     private final String recUrl = "http://210.109.54.22:8085";
+
 
     /**
      * Hashtag 생성
@@ -183,9 +182,9 @@ public class PostHashtagService {
         postHashtagRepository.deleteAll(postHashtags);
     }
 
-    public void sendNewHashtags(Long memberId, List<String> hashtags, HttpServletRequest request) {
+    public void sendNewHashtags(Long blogId, List<String> hashtags, HttpServletRequest request) {
 
-        String updateURL = recUrl + "/recommends/update";
+        String updateURL = recUrl + "/recommends/hashtags";
         String jsonBody;
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -193,8 +192,8 @@ public class PostHashtagService {
         try {
             Map<String, Object> docFields = new HashMap<>();
             docFields.put("newHashtag", hashtags);
-            docFields.put("memberId", memberId);
-
+            docFields.put("blogId", blogId);
+            System.out.println("docFields = " + docFields);
             jsonBody = objectMapper.writeValueAsString(docFields);
             HttpRequest updateRequest = HttpRequest.newBuilder()
                     .uri(URI.create(updateURL))
@@ -217,11 +216,11 @@ public class PostHashtagService {
         }
     }
 
-    public void sendAllHashtags(Long memberId, HttpServletRequest request){
+    public void sendAllHashtags(Long memberId, Long blogId, HttpServletRequest request){
 
         List<String> hashtags = getHashtags(memberId);
 
-        String updateURL = recUrl + "/recommends/edit";
+        String updateURL = recUrl + "/recommends/editings";
         String jsonBody;
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -229,8 +228,8 @@ public class PostHashtagService {
         try {
             Map<String, Object> docFields = new HashMap<>();
             docFields.put("changedHashtag", hashtags);
-            docFields.put("memberId", memberId);
-
+            docFields.put("blogId", blogId);
+            System.out.println("docFields = " + docFields);
             jsonBody = objectMapper.writeValueAsString(docFields);
             HttpRequest updateRequest = HttpRequest.newBuilder()
                     .uri(URI.create(updateURL))
