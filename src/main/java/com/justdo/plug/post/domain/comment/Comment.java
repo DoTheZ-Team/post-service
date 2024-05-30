@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Builder.Default;
 
 @Entity
 @Getter
@@ -47,6 +48,7 @@ public class Comment extends BaseTimeEntity {
     private Comment parentComment;
 
     @OneToMany(mappedBy = "parentComment", orphanRemoval = true, cascade = CascadeType.ALL)
+    @Default
     private List<Comment> children = new ArrayList<>();
 
     /**
