@@ -51,6 +51,7 @@ public class PostController {
     private final LikesService likesService;
 
 
+
     // BLOG001: 게시글 리스트 조회 요청
     @GetMapping("all")
     @Operation(summary = "모든 게시글 리스트 조회 요청", description = "데이터 베이스 내에 있는 모든 게시글 리스트를 조회 합니다")
@@ -95,7 +96,8 @@ public class PostController {
         photoService.createPhoto(requestDto.getPhotoUrls(), post);
 
         // 4. Recommend Service 로 해시태그 보내주기
-        postHashtagService.sendNewHashtags(memberId, requestDto.getHashtags(), request);
+        postHashtagService.sendNewHashtags(blogId, requestDto.getHashtags(), request);
+
 
         return ApiResponse.onSuccess("게시글이 성공적으로 업로드 되었습니다");
     }
@@ -107,10 +109,11 @@ public class PostController {
     public ApiResponse<String> EditBlog(HttpServletRequest request, @PathVariable Long postId,
             @RequestBody PostUpdateDto updateDto)
             throws JsonProcessingException {
-
+        Post post = postService.getPost(postId);
+        Long blogId = post.getBlogId();
         // 전체 해시태그 Recommend Service 로 보내주기
         Long memberId = jwtProvider.getUserIdFromToken(request);
-        postHashtagService.sendAllHashtags(memberId, request);
+        postHashtagService.sendAllHashtags(memberId, blogId, request);
 
         return ApiResponse.onSuccess(postService.UpdatePost(postId, updateDto));
     }
@@ -121,8 +124,11 @@ public class PostController {
     @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
     public ApiResponse<String> deletePost(HttpServletRequest request, @PathVariable Long postId) {
 
+        Post post = postService.getPost(postId);
+        Long blogId = post.getBlogId();
+
         Long memberId = jwtProvider.getUserIdFromToken(request);
-        postHashtagService.sendAllHashtags(memberId, request);
+        postHashtagService.sendAllHashtags(memberId, blogId, request);
 
         return ApiResponse.onSuccess(postService.deletePost(postId));
     }
