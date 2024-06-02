@@ -1,26 +1,20 @@
 package com.justdo.plug.post.domain.posthashtag.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.hashtag.Hashtag;
 import com.justdo.plug.post.domain.hashtag.service.HashtagService;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.PostHashtag;
 import com.justdo.plug.post.domain.posthashtag.repository.PostHashtagRepository;
+import com.justdo.plug.post.domain.recommend.RecommendClient;
 import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import com.justdo.plug.post.global.utils.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.*;
 
 @Service
@@ -32,9 +26,7 @@ public class PostHashtagService {
     private final HashtagService hashtagService;
     private final PostRepository postRepository;
     private final JwtProvider jwtProvider;
-
-
-    private final String recUrl = "http://210.109.54.22:8085";
+    private final RecommendClient recommendClient;
 
 
     /**
@@ -182,76 +174,25 @@ public class PostHashtagService {
         postHashtagRepository.deleteAll(postHashtags);
     }
 
-    public void sendNewHashtags(Long blogId, List<String> hashtags, HttpServletRequest request) {
+    public void sendNewHashtags(Long blogId, List<String> hashtags, String token) {
+        Map<String, Object> docFields = new HashMap<>();
+        docFields.put("newHashtag", hashtags);
+        docFields.put("blogId", blogId);
+        System.out.println("docFields = " + docFields);
 
-        String updateURL = recUrl + "/recommends/hashtags";
-        String jsonBody;
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        String token = jwtProvider.parseToken(request);
-        try {
-            Map<String, Object> docFields = new HashMap<>();
-            docFields.put("newHashtag", hashtags);
-            docFields.put("blogId", blogId);
-            System.out.println("docFields = " + docFields);
-            jsonBody = objectMapper.writeValueAsString(docFields);
-            HttpRequest updateRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(updateURL))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-
-            HttpClient client = HttpClient.newHttpClient();
-            HttpResponse<String> updateResponse = client.send(updateRequest,
-                    HttpResponse.BodyHandlers.ofString());
-
-            if (updateResponse.statusCode() == 200) {
-                System.out.println("업데이트 완료");
-            } else {
-                System.out.println("업데이트 도중 오류가 발생하였습니다: " + updateResponse);
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        recommendClient.sendNewHashtags(docFields, "Bearer " + token);
     }
 
-    public void sendAllHashtags(Long memberId, Long blogId, HttpServletRequest request){
-
+    public void sendAllHashtags(Long memberId, Long blogId, HttpServletRequest request) {
         List<String> hashtags = getHashtags(memberId);
 
-        String updateURL = recUrl + "/recommends/editings";
-        String jsonBody;
-        ObjectMapper objectMapper = new ObjectMapper();
-
         String token = jwtProvider.parseToken(request);
-        try {
-            Map<String, Object> docFields = new HashMap<>();
-            docFields.put("changedHashtag", hashtags);
-            docFields.put("blogId", blogId);
-            System.out.println("docFields = " + docFields);
-            jsonBody = objectMapper.writeValueAsString(docFields);
-            HttpRequest updateRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(updateURL))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
+        Map<String, Object> docFields = new HashMap<>();
+        docFields.put("changedHashtag", hashtags);
+        docFields.put("blogId", blogId);
+        System.out.println("docFields = " + docFields);
 
-            HttpClient client = HttpClient.newHttpClient();
-            HttpResponse<String> updateResponse = client.send(updateRequest,
-                    HttpResponse.BodyHandlers.ofString());
-
-            if (updateResponse.statusCode() == 200) {
-                System.out.println("업데이트 완료");
-            } else {
-                System.out.println("업데이트 도중 오류가 발생하였습니다: " + updateResponse);
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-
+        recommendClient.sendAllHashtags(docFields, "Bearer " + token);
     }
-
 
 }
