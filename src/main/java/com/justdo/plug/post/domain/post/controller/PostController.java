@@ -85,6 +85,7 @@ public class PostController {
             throws JsonProcessingException {
 
         Long memberId = jwtProvider.getUserIdFromToken(request);
+        String token = jwtProvider.parseToken(request);
 
         // 1. Post 저장
         Post post = postService.save(requestDto, blogId, memberId);
@@ -96,8 +97,7 @@ public class PostController {
         photoService.createPhoto(requestDto.getPhotoUrls(), post);
 
         // 4. Recommend Service 로 해시태그 보내주기
-        postHashtagService.sendNewHashtags(blogId, requestDto.getHashtags(), request);
-
+        postHashtagService.sendNewHashtags(blogId, requestDto.getHashtags(), token);
 
         return ApiResponse.onSuccess("게시글이 성공적으로 업로드 되었습니다");
     }
