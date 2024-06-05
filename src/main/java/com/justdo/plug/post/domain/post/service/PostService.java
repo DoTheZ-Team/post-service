@@ -490,4 +490,8 @@ public class PostService {
         );
     }
 
+    public void sendSticker(List<PostStickerDTO.PostStickerItem> postStickerItemList) {
+        stickerClient.savePostStickers(postStickerItemList);
+    }
+
 }
