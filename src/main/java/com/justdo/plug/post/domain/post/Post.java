@@ -1,6 +1,7 @@
 package com.justdo.plug.post.domain.post;
 
 import com.justdo.plug.post.domain.common.BaseTimeEntity;
+import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -50,22 +51,9 @@ public class Post extends BaseTimeEntity {
     @Column
     private String categoryName;
 
-    // 필드 값 변경을 위한 메서드
+    // UPDATE METHOD
     public void changeEsId(String esId) {
         this.esId = esId;
-    }
-
-    public void changeContent(String content) {
-        this.content = content;
-    }
-
-    public void changeTitle(String title) {
-        this.title = title;
-    }
-
-
-    public void changePreview(String preview) {
-        this.preview = preview;
     }
 
     public void increaseLike() {
@@ -76,7 +64,10 @@ public class Post extends BaseTimeEntity {
         this.likeCount--;
     }
 
-    public void changeCategory(String categoryName){
-        this.categoryName = categoryName;
+    public void changePost(PostUpdateDto request, String preview) {
+        this.title = request.getTitle();
+        this.content = request.getContent();
+        this.preview = preview;
+        this.categoryName = request.getCategoryName();
     }
 }
