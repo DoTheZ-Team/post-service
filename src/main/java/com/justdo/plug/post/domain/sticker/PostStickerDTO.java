@@ -48,7 +48,6 @@ public class PostStickerDTO {
     @Schema(description = "포스트에 저장된 스티커 리스트 정보 DTO")
     @Getter
     public static class PostStickerItems {
-        private Long postId;
         private List<PostStickerItem> postStickerItem;
     }
 
@@ -69,9 +68,8 @@ public class PostStickerDTO {
     public static class PostStickerUrlItems {
 
         @Schema(description = "url포함 포스트-스티커 리스트")
-        @JsonProperty("postStickerId")
+        @JsonProperty("postStickerUrlItems")
         private List<PostStickerUrlItem> postStickerUrlItems;
+
     }
-
-
 }

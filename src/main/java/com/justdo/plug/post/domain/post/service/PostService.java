@@ -109,8 +109,7 @@ public class PostService {
         String nickname = authClient.getMemberName(memberId);
 
 
-        PostStickerDTO.PostStickerUrlItems postStickerUrlItems = stickerClient.getStickers(postId);
-        System.out.println("postStickerUrlItem = " + postStickerUrlItems);
+        PostStickerDTO.PostStickerUrlItems postStickerUrlItems = stickerClient.getStickersByPostId(postId);
 
 
         return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls, postStickerUrlItems, nickname);
