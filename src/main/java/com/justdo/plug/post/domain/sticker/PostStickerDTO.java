@@ -9,7 +9,6 @@ import java.util.List;
 public class PostStickerDTO {
     @Schema(description = "스티커 포스트 정보 DTO")
     @Getter
-    @Setter
     public static class PostStickerItem {
 
         @Schema(description = "포스트-스티커의 id")
@@ -43,7 +42,13 @@ public class PostStickerDTO {
         @Schema(description = "스티커의 angle")
         @JsonProperty("angle")
         private double rotation;
+
+        public void setPostId(Long postId) {
+            this.postId = postId;
+        }
     }
+
+
 
     @Schema(description = "포스트에 저장된 스티커 리스트 정보 DTO")
     @Getter

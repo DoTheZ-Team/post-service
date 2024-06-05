@@ -105,6 +105,7 @@ public class PostController {
         List<PostStickerDTO.PostStickerItem> postStickerItemList = requestDto.getPostStickerItemList();
         if (postStickerItemList != null) {
             for (PostStickerDTO.PostStickerItem item : postStickerItemList) {
+
                 item.setPostId(postId);
             }
         }
