@@ -93,6 +93,9 @@ public class SearchResponse {
         @Schema(description = "전체 데이터의 개수")
         private Integer totalElements;
 
+        @Schema(description = "추가 목록이 있는 지의 여부")
+        private Boolean hasNext;
+
         @Schema(description = "첫 페이지의 여부")
         private Boolean isFirst;
 
@@ -108,14 +111,21 @@ public class SearchResponse {
             .mapToObj(idx -> toPostInfo(postSearchList.get(idx), photoUrlList.get(idx)))
             .toList();
 
+        boolean isFirst = pageable.getPageNumber() == 0;
+        boolean isLast = (pageable.getPageNumber() + 1) * pageable.getPageSize() >= totalValue;
+        boolean hasNext = !isLast;
+
         return PostSearchItem.builder()
-            .postSearchList(postInfoList)
-            .listSize(postInfoList.size())
-            .totalPage((int) (Math.ceil((double) totalValue / pageable.getPageSize())))
-            .totalElements(totalValue)
-            .isFirst(pageable.getPageNumber() == 0)
-            .isLast((pageable.getPageNumber() + 1) * pageable.getPageSize() > totalValue)
-            .build();
+                .postSearchList(postInfoList)
+                .listSize(postInfoList.size())
+                .totalPage((int) (Math.ceil((double) totalValue / pageable.getPageSize())))
+                .totalElements(totalValue)
+                .isFirst(isFirst)
+                .isLast(isLast)
+                .hasNext(hasNext)
+                .build();
+
+        
 
     }
 
