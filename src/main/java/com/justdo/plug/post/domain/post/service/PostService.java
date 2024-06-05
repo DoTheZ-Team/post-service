@@ -223,10 +223,33 @@ public class PostService {
     }
 
     @Transactional
-    public String savePostIndex(Post post) {
+    public String savePostIndex(Post post) throws JsonProcessingException {
+
         PostDocument postDocument = PostDocument.toDocument(post);
-        PostDocument document = postElasticsearchRepository.save(postDocument);
-        return document.getId();
+        String jsonDocument = mapper.writeValueAsString(postDocument);
+
+        String createURL = url + "/post/_doc";
+        HttpRequest createRequest = HttpRequest.newBuilder()
+                .uri(URI.create(createURL))
+                .header("Authorization", "ApiKey " + apiKey)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonDocument))
+                .build();
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> createResponse = client.send(createRequest,
+                    HttpResponse.BodyHandlers.ofString());
+
+            if (createResponse.statusCode() == 200 || createResponse.statusCode() == 201) {
+                JsonNode jsonResponse = mapper.readTree(createResponse.body());
+                return jsonResponse.get("_id").asText();
+            } else {
+                return "게시글 수정도중 오류가 발생하였습니다: " + createResponse;
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return e.toString();
+        }
     }
 
     @Transactional
