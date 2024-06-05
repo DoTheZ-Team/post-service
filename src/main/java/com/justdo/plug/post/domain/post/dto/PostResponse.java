@@ -1,16 +1,16 @@
 package com.justdo.plug.post.domain.post.dto;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.sticker.PostStickerDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.json.JSONArray;
 
 public class PostResponse {
 
@@ -50,7 +50,7 @@ public class PostResponse {
         private String title;
 
         @Schema(description = "포스트 내용")
-        private Object[] content;
+        private List<Object> content;
 
         @Schema(description = "포스트의 좋아요 개수")
         private int likeCount;
@@ -92,18 +92,19 @@ public class PostResponse {
 
     // SUB: 게시글 반환 함수
     public static PostResponse.PostDetail toPostDetail(Post post, boolean isLike,
-            boolean isSubscribe, List<String> postHashtags, String categoryName, List<String> photoUrls, PostStickerDTO.PostStickerUrlItems postStickerUrlItems, String nickname) {
+            boolean isSubscribe, List<String> postHashtags,
+            List<String> photoUrls, PostStickerDTO.PostStickerUrlItems postStickerUrlItems,
+            String nickname) {
 
-        String JsonContent = post.getContent();
-        JSONArray jsonArray = new JSONArray(JsonContent);
-        List<Object> list = jsonArray.toList();
-        Object[] array = list.toArray();
+        List<Object> contentList = new Gson().fromJson(post.getContent(),
+                new TypeToken<List<Object>>() {
+                }.getType());
 
         return PostDetail.builder()
                 .nickname(nickname)
                 .postId(post.getId())
                 .title(post.getTitle())
-                .content(array)
+                .content(contentList)
                 .likeCount(post.getLikeCount())
                 .temporaryState(post.isTemporaryState())
                 .createdAt(post.getCreatedAt())
@@ -113,11 +114,10 @@ public class PostResponse {
                 .isLike(isLike)
                 .isSubscribe(isSubscribe)
                 .postHashtags(postHashtags)
-                .categoryName(categoryName)
+                .categoryName(post.getCategoryName())
                 .photoUrls(photoUrls)
                 .postStickerUrlItems(postStickerUrlItems)
                 .build();
-
     }
 
 }
