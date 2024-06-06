@@ -26,7 +26,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -51,33 +50,19 @@ public class PostController {
     private final JwtProvider jwtProvider;
     private final LikesService likesService;
 
-
-
-    // BLOG001: 게시글 리스트 조회 요청
-    @GetMapping("all")
-    @Operation(summary = "모든 게시글 리스트 조회 요청", description = "데이터 베이스 내에 있는 모든 게시글 리스트를 조회 합니다")
-    public ApiResponse<List<Post>> ViewList() {
-
-        return ApiResponse.onSuccess(postService.getAllPosts());
-
-    }
-
-    // BLOG002: 게시글 상세페이지 조회 요청
     @GetMapping("{postId}")
     @Operation(summary = "특정 게시글 상세 페이지 조회 요청", description = "특정 게시글의 상세 페이지를 요청합니다(제목, 글, 좋아요 갯수, 현재 사용자가 좋아요 했는지 여부 등)")
     @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
     public ApiResponse<PostResponse.PostDetailResult> ViewPage(HttpServletRequest request,
-            @PathVariable Long postId) throws JSONException {
+            @PathVariable Long postId) {
 
         Long memberId = jwtProvider.getUserIdFromToken(request);
         boolean isLike = likesService.isLike(memberId, postId);
         PostDetail postDetail = postService.getPostById(postId, memberId, isLike);
 
         return ApiResponse.onSuccess(PostResponse.toPostDetailResult(memberId, postDetail));
-
     }
 
-    // BLOG003: 게시글 작성 요청
     @PostMapping("{blogId}")
     @Operation(summary = "게시글 작성 요청", description = "해당(본인) 블로그에 게시글을 작성합니다")
     @Parameter(name = "blogId", description = "사용자 블로그의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
@@ -88,17 +73,13 @@ public class PostController {
         Long memberId = jwtProvider.getUserIdFromToken(request);
         String token = jwtProvider.parseToken(request);
 
-        // 1. Post 저장
         Post post = postService.save(requestDto, blogId, memberId);
         Long postId = post.getId();
 
-        // 2. Post_Hashtag 저장
         postHashtagService.createHashtag(requestDto.getHashtags(), post);
 
-        // 3. Photo 저장
         photoService.createPhoto(requestDto.getPhotoUrls(), post);
 
-        // 4. Recommend Service 로 해시태그 보내주기
         postHashtagService.sendNewHashtags(blogId, requestDto.getHashtags(), token);
 
         // 5. Sticker Service 로 Sticker 정보 보내주기
@@ -115,7 +96,6 @@ public class PostController {
         return ApiResponse.onSuccess("게시글이 성공적으로 업로드 되었습니다");
     }
 
-    // BLOG004: 게시글 수정 요청
     @PatchMapping("{postId}")
     @Operation(summary = "특정게시글 수정 요청", description = "해당 게시글을 수정합니다")
     @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
@@ -131,7 +111,6 @@ public class PostController {
         return ApiResponse.onSuccess(postService.UpdatePost(postId, updateDto));
     }
 
-    // BLOG005: 게시글 삭제 요청
     @DeleteMapping("{postId}")
     @Operation(summary = "특정게시글 삭제 요청", description = "해당 게시글을 삭제합니다")
     @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
@@ -146,8 +125,6 @@ public class PostController {
         return ApiResponse.onSuccess(postService.deletePost(postId));
     }
 
-    // BlOG007: 특정 멤버가 사용한 HASHTAG 값 조회
-    // Recommend service에서 사용예정이라 따로 JWT 파싱 진행 안함
     @GetMapping("memberId/{memberId}")
     @Operation(summary = "특정 멤버가 사용한 HASHTAG 값 조회", description = "Open Feign을 통해 사용되는 API입니다.")
     public List<String> ViewHashtags(@PathVariable Long memberId) {

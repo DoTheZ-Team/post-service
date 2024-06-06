@@ -16,7 +16,6 @@ public class LikesService {
     private final LikesRepository likeRepository;
     private final PostService postService;
 
-    // 좋아요 등록
     public LikesResponse postLike(Long postId, Long memberId) {
 
         return likeRepository.findByPostIdAndMemberId(postId, memberId)
@@ -45,7 +44,5 @@ public class LikesService {
 
         return LikesResponse.toLikeResponse(newLike);
     }
-
-
 
 }
