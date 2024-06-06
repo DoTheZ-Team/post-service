@@ -1,19 +1,19 @@
 package com.justdo.plug.post.domain.sticker;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 public class PostStickerDTO {
     @Schema(description = "스티커 포스트 정보 DTO")
     @Getter
     public static class PostStickerItem {
+        @JsonIgnore
         @Schema(description = "포스트-스티커의 id", example = "1")
         private Long postStickerId;
 
+        @JsonIgnore
         @Schema(description = "포스트의 id", example = "2")
         private Long postId;
 
