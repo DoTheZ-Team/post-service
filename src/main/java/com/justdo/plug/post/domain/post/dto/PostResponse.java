@@ -119,4 +119,25 @@ public class PostResponse {
                 .build();
     }
 
+    @Schema(description = "포스트 작성 후, 응답 DTO")
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PostProc {
+
+        @Schema(description = "포스트가 작성된 블로그 ID", example = "1")
+        private Long blogId;
+
+        @Schema(description = "포스트 ID", example = "2")
+        private Long postId;
+    }
+
+    public static PostProc toPostProc(Post post) {
+
+        return PostProc.builder()
+                .blogId(post.getBlogId())
+                .postId(post.getId())
+                .build();
+    }
 }

@@ -7,6 +7,7 @@ import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponse;
 import com.justdo.plug.post.domain.post.dto.PostResponse.PostDetail;
+import com.justdo.plug.post.domain.post.dto.PostResponse.PostProc;
 import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.BlogPostItem;
@@ -66,7 +67,7 @@ public class PostController {
     @PostMapping()
     @Operation(summary = "게시글 작성 요청", description = "해당(본인) 블로그에 게시글을 작성합니다")
     @Parameter(name = "blogId", description = "사용자 블로그의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
-    public ApiResponse<String> PostBlog(HttpServletRequest request,
+    public ApiResponse<PostProc> PostBlog(HttpServletRequest request,
             @RequestBody PostRequestDto requestDto)
             throws JsonProcessingException {
 
@@ -95,7 +96,7 @@ public class PostController {
 
         postService.sendSticker(postStickerItemList);
 
-        return ApiResponse.onSuccess("게시글이 성공적으로 업로드 되었습니다");
+        return ApiResponse.onSuccess(PostResponse.toPostProc(post));
     }
 
     @PatchMapping("{postId}")
