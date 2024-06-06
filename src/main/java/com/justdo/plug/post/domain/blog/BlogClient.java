@@ -4,9 +4,7 @@ import com.justdo.plug.post.domain.blog.BlogDto.BlogInfo;
 import com.justdo.plug.post.domain.post.dto.SearchResponse.BlogInfoItem;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "blog-service", url = "${application.config.blogs-url}")
 public interface BlogClient {
@@ -20,4 +18,7 @@ public interface BlogClient {
 
     @PostMapping("/subscriptions")
     boolean checkSubscribeById(@RequestBody SubscriptionRequest.LoginSubscription loginSubscription);
+
+    @GetMapping("members/{memberId}")
+    Long getBlogId(@PathVariable Long memberId);
 }

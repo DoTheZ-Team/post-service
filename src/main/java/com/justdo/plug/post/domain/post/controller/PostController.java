@@ -63,14 +63,16 @@ public class PostController {
         return ApiResponse.onSuccess(PostResponse.toPostDetailResult(memberId, postDetail));
     }
 
-    @PostMapping("{blogId}")
+    @PostMapping()
     @Operation(summary = "게시글 작성 요청", description = "해당(본인) 블로그에 게시글을 작성합니다")
     @Parameter(name = "blogId", description = "사용자 블로그의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
     public ApiResponse<String> PostBlog(HttpServletRequest request,
-            @RequestBody PostRequestDto requestDto, @PathVariable Long blogId)
+            @RequestBody PostRequestDto requestDto)
             throws JsonProcessingException {
 
+
         Long memberId = jwtProvider.getUserIdFromToken(request);
+        Long blogId = postService.getBlogIdByMemberId(memberId);
         String token = jwtProvider.parseToken(request);
 
         Post post = postService.save(requestDto, blogId, memberId);
