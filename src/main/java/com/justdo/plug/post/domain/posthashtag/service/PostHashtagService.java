@@ -11,11 +11,14 @@ import com.justdo.plug.post.global.exception.ApiException;
 import com.justdo.plug.post.global.response.code.status.ErrorStatus;
 import com.justdo.plug.post.global.utils.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,25 +31,18 @@ public class PostHashtagService {
     private final JwtProvider jwtProvider;
     private final RecommendClient recommendClient;
 
-
-    /**
-     * Hashtag 생성
-     */
     @Transactional
     public void createHashtag(List<String> hashtags, Post post) {
 
         Optional.ofNullable(hashtags)
-            .ifPresent(list -> list.forEach(hashtag -> {
+                .ifPresent(list -> list.forEach(hashtag -> {
 
-                // 해시태그 이름으로 해시태그 ID를 가져오는 메서드
-                Hashtag findHashtag = hashtagService.getHashtagIdByName(hashtag);
+                    Hashtag findHashtag = hashtagService.getHashtagIdByName(hashtag);
 
-                // Post_Hashtag 엔티티 생성
-                PostHashtag postHashtag = new PostHashtag(post, findHashtag);
+                    PostHashtag postHashtag = new PostHashtag(post, findHashtag);
 
-                // Post_Hashtag 엔티티 저장
-                save(postHashtag);
-            }));
+                    save(postHashtag);
+                }));
     }
 
     @Transactional
@@ -76,8 +72,8 @@ public class PostHashtagService {
 
         // 블로그 아이디에 해당하는 포스트의 아이디만 추출하여 반환
         List<Long> postIds = blogPosts.stream()
-            .map(Post::getId)
-            .toList();
+                .map(Post::getId)
+                .toList();
 
         List<String> hashtagNames = new ArrayList<>();
 
@@ -89,7 +85,7 @@ public class PostHashtagService {
             for (PostHashtag postHashtag : postHashtags) {
                 // 아이디에서 해시태그 명으로 변경 후 리스트에 저장
                 String hashtagName = hashtagService.getHashtagNameById(
-                    postHashtag.getHashtag().getId());
+                        postHashtag.getHashtag().getId());
                 hashtagNames.add(hashtagName);
             }
         }
@@ -109,8 +105,8 @@ public class PostHashtagService {
 
         // 멤버 아이디에 해당하는 포스트의 아이디만 추출하여 반환
         List<Long> postIds = memberPosts.stream()
-            .map(Post::getId)
-            .toList();
+                .map(Post::getId)
+                .toList();
 
         List<String> hashtagNames = new ArrayList<>();
 
@@ -122,7 +118,7 @@ public class PostHashtagService {
             for (PostHashtag postHashtag : postHashtags) {
                 // 아이디에서 해시태그 명으로 변경 후 리스트에 저장
                 String hashtagName = hashtagService.getHashtagNameById(
-                    postHashtag.getHashtag().getId());
+                        postHashtag.getHashtag().getId());
                 hashtagNames.add(hashtagName);
             }
         }
@@ -151,22 +147,18 @@ public class PostHashtagService {
         return hashtagNames;
     }
 
-
     public void save(PostHashtag postHashtag) {
         postHashtagRepository.save(postHashtag);
     }
 
-    /**
-     * 최신 Post의 hashtag 조회
-     */
     public List<String> getHashtagNamesByPost(List<Post> posts) {
 
         List<PostHashtag> postHashtags = postHashtagRepository.findByPostList(posts);
 
         return postHashtags.stream()
-            .map(ph -> hashtagService.getHashtagNameById(ph.getHashtag().getId()))
-            .distinct()
-            .toList();
+                .map(ph -> hashtagService.getHashtagNameById(ph.getHashtag().getId()))
+                .distinct()
+                .toList();
     }
 
     public void deletePostHashtags(Long postId) {
@@ -178,7 +170,6 @@ public class PostHashtagService {
         Map<String, Object> docFields = new HashMap<>();
         docFields.put("newHashtag", hashtags);
         docFields.put("blogId", blogId);
-        System.out.println("docFields = " + docFields);
 
         recommendClient.sendNewHashtags(docFields, "Bearer " + token);
     }
@@ -190,7 +181,6 @@ public class PostHashtagService {
         Map<String, Object> docFields = new HashMap<>();
         docFields.put("changedHashtag", hashtags);
         docFields.put("blogId", blogId);
-        System.out.println("docFields = " + docFields);
 
         recommendClient.sendAllHashtags(docFields, "Bearer " + token);
     }

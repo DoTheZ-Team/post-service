@@ -4,71 +4,46 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class PostStickerDTO {
     @Schema(description = "스티커 포스트 정보 DTO")
     @Getter
     public static class PostStickerItem {
-
-        @Schema(description = "포스트-스티커의 id")
-        @JsonProperty("postStickerId")
+        @Schema(description = "포스트-스티커의 id", example = "1")
         private Long postStickerId;
 
-        @Schema(description = "포스트의 id")
-        @JsonProperty("postId")
+        @Schema(description = "포스트의 id", example = "2")
         private Long postId;
 
-        @Schema(description = "스티커의 id")
-        @JsonProperty("stickerId")
+        @Schema(description = "스티커의 id", example = "3")
         private Long stickerId;
 
-        @Schema(description = "스티커의 x_location")
-        @JsonProperty("xLocation")
-        private int xLocation;
-
-        @Schema(description = "스티커의 y_location")
-        @JsonProperty("yLocation")
-        private int yLocation;
-
-        @Schema(description = "스티커의 width")
-        @JsonProperty("width")
-        private int width;
-
-        @Schema(description = "스티커의 height")
-        @JsonProperty("height")
-        private int height;
-
-        @Schema(description = "스티커의 angle")
-        @JsonProperty("angle")
-        private int angle;
-    }
-
-    @Schema(description = "포스트에 저장된 스티커 리스트 정보 DTO")
-    @Getter
-    public static class PostStickerItems {
-        private Long postId;
-        private List<PostStickerItem> postStickerItems;
-    }
-
-    @Schema(description = "url포함 스티커 포스트 정보 DTO")
-    @Getter
-    public static class PostStickerUrlItem {
-
-        @Schema(description = "스티커 item")
-        private PostStickerItem postStickerItem;
-
-        @Schema(description = "스티커의 url")
+        @Schema(description = "스티커의 url", example = "https://glue-bucket-sticker.s3.ap-northeast-2.amazonaws.com/54728a63-ff4b-4b3e-aea8-18036491b97c.png")
         private String url;
 
+        @Schema(description = "스티커의 x 위치", example = "100")
+        @JsonProperty(value = "xLocation")
+        private int xlocation;
+
+        @Schema(description = "스티커의 y 위치", example = "100")
+        @JsonProperty(value = "yLocation")
+        private int ylocation;
+
+        @Schema(description = "스티커의 scaleX", example = "100")
+        private double scaleX;
+
+        @Schema(description = "스티커의 scaleY", example = "100")
+        private double scaleY;
+
+        @Schema(description = "스티커의 rotation", example = "100")
+        private double rotation;
+
+        public void setPostId(Long postId) {
+            this.postId = postId;
+        }
     }
 
-    @Schema(description = "url 포함 스티커 포스트 정보 DTO")
-    @Getter
-    public static class PostStickerUrlItems {
 
-        @Schema(description = "url포함 포스트-스티커 리스트")
-        @JsonProperty("postStickerId")
-        private List<PostStickerUrlItem> postStickerUrlItems;
-    }
 }

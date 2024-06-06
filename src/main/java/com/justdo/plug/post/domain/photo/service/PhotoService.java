@@ -3,8 +3,6 @@ package com.justdo.plug.post.domain.photo.service;
 import com.justdo.plug.post.domain.photo.Photo;
 import com.justdo.plug.post.domain.photo.repository.PhotoRepository;
 import com.justdo.plug.post.domain.post.Post;
-import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,16 +56,14 @@ public class PhotoService {
     }
 
     @Transactional
-    public void updatePhotoUrls(Post post, Long postId, PostUpdateDto updateDto) {
-        // 기존의 photos 삭제
+    public void updatePhotoUrls(Post post, Long postId, List<String> photoUrls) {
+
         photoRepository.deleteByPostId(postId);
 
-        // 새로운 photoUrl 리스트를 기반으로 Photo 엔티티 생성
-        List<Photo> newPhotos = updateDto.getPhotoUrls().stream()
+        List<Photo> newPhotos = photoUrls.stream()
                 .map(url -> new Photo(url, post))
                 .collect(Collectors.toList());
 
-        // 새로운 photos 저장
         photoRepository.saveAll(newPhotos);
     }
 
