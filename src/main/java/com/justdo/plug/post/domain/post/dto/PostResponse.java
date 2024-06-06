@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.justdo.plug.post.domain.post.Post;
 import com.justdo.plug.post.domain.sticker.PostStickerDTO;
+import com.justdo.plug.post.domain.sticker.PostStickerResponseDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -86,13 +87,13 @@ public class PostResponse {
         private List<String> photoUrls;
 
         @Schema(description = "포스트의 스티커 정보")
-        private List<PostStickerDTO.PostStickerItem> postStickerItems;
+        private List<PostStickerResponseDTO.PostStickerItem> postStickerItems;
 
     }
 
     // SUB: 게시글 반환 함수
     public static PostResponse.PostDetail toPostDetail(Post post, boolean isLike,
-            boolean isSubscribe, List<String> postHashtags, List<String> photoUrls, List<PostStickerDTO.PostStickerItem> postStickerItems, String nickname) {
+            boolean isSubscribe, List<String> postHashtags, List<String> photoUrls, List<PostStickerResponseDTO.PostStickerItem> postStickerItems, String nickname) {
 
         List<Object> contentList = new Gson().fromJson(post.getContent(),
                 new TypeToken<List<Object>>() {

@@ -27,6 +27,7 @@ import com.justdo.plug.post.domain.post.dto.SearchResponse.SearchInfo;
 import com.justdo.plug.post.domain.post.repository.PostRepository;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
 import com.justdo.plug.post.domain.sticker.PostStickerDTO;
+import com.justdo.plug.post.domain.sticker.PostStickerResponseDTO;
 import com.justdo.plug.post.domain.sticker.StickerClient;
 import com.justdo.plug.post.elastic.PostDocument;
 import com.justdo.plug.post.global.exception.ApiException;
@@ -90,7 +91,7 @@ public class PostService {
         boolean isSubscribe = blogClient.checkSubscribeById(loginSubscription);
         String nickname = authClient.getMemberName(memberId);
 
-        List<PostStickerDTO.PostStickerItem> postStickerItems = stickerClient.getStickersByPostId(postId);
+        List<PostStickerResponseDTO.PostStickerItem> postStickerItems = stickerClient.getStickersByPostId(postId);
 
         return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, photoUrls, postStickerItems, nickname);
 
@@ -389,6 +390,10 @@ public class PostService {
 
     public void sendSticker(List<PostStickerDTO.PostStickerItem> postStickerItemList) {
         stickerClient.savePostStickers(postStickerItemList);
+    }
+
+    public Long getBlogIdByMemberId(Long memberId) {
+        return blogClient.getBlogId(memberId);
     }
 
 }

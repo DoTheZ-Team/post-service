@@ -12,7 +12,7 @@ import java.util.List;
 public interface StickerClient {
 
     @GetMapping("/poststickers")
-    List<PostStickerDTO.PostStickerItem> getStickersByPostId(@RequestParam("postId") Long postId);
+    List<PostStickerResponseDTO.PostStickerItem> getStickersByPostId(@RequestParam("postId") Long postId);
     @PostMapping("/post-list")
     void savePostStickers(@RequestBody List<PostStickerDTO.PostStickerItem> postStickerItemList);
 }
