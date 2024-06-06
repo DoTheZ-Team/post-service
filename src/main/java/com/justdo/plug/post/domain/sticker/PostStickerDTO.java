@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class PostStickerDTO {
     @Schema(description = "스티커 포스트 정보 DTO")
     @Getter
-
     public static class PostStickerItem {
         @Schema(description = "포스트-스티커의 id", example = "1")
         private Long postStickerId;
@@ -24,12 +24,12 @@ public class PostStickerDTO {
         private String url;
 
         @Schema(description = "스티커의 x 위치", example = "100")
-        @JsonProperty("xLocation")
-        private int xLocation;
+        @JsonProperty(value = "xLocation")
+        private int xlocation;
 
         @Schema(description = "스티커의 y 위치", example = "100")
-        @JsonProperty("yLocation")
-        private int yLocation;
+        @JsonProperty(value = "yLocation")
+        private int ylocation;
 
         @Schema(description = "스티커의 scaleX", example = "100")
         private double scaleX;
@@ -46,33 +46,4 @@ public class PostStickerDTO {
     }
 
 
-
-
-    @Schema(description = "포스트에 저장된 스티커 리스트 정보 DTO")
-    @Getter
-    public static class PostStickerItems {
-        private List<PostStickerItem> postStickerItem;
-    }
-
-    @Schema(description = "url포함 스티커 포스트 정보 DTO")
-    @Getter
-    public static class PostStickerUrlItem {
-
-        @Schema(description = "스티커 item")
-        private PostStickerItem postStickerItem;
-
-        @Schema(description = "스티커의 url")
-        private String url;
-
-    }
-
-    @Schema(description = "url 포함 스티커 포스트 정보 DTO")
-    @Getter
-    public static class PostStickerUrlItems {
-
-        @Schema(description = "url포함 포스트-스티커 리스트")
-        @JsonProperty("postStickerUrlItems")
-        private List<PostStickerUrlItem> postStickerUrlItems;
-
-    }
 }
