@@ -109,11 +109,10 @@ public class PostService {
         String nickname = authClient.getMemberName(memberId);
 
 
-        PostStickerDTO.PostStickerUrlItems postStickerUrlItems = stickerClient.getStickers(postId);
-        System.out.println("postStickerUrlItem = " + postStickerUrlItems);
+        List<PostStickerDTO.PostStickerItem> postStickerItems = stickerClient.getStickersByPostId(postId);
 
 
-        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls, postStickerUrlItems, nickname);
+        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls, postStickerItems, nickname);
     }
 
     // BLOG003: 블로그 작성
@@ -488,6 +487,10 @@ public class PostService {
         return postRepository.findById(postId).orElseThrow(
                 () -> new ApiException(ErrorStatus._POST_NOT_FOUND)
         );
+    }
+
+    public void sendSticker(List<PostStickerDTO.PostStickerItem> postStickerItemList) {
+        stickerClient.savePostStickers(postStickerItemList);
     }
 
 }

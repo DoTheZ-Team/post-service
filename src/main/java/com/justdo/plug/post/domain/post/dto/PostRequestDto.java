@@ -2,6 +2,8 @@ package com.justdo.plug.post.domain.post.dto;
 
 import com.justdo.plug.post.domain.post.Post;
 import java.util.List;
+
+import com.justdo.plug.post.domain.sticker.PostStickerDTO;
 import lombok.Getter;
 
 @Getter
@@ -13,6 +15,7 @@ public class PostRequestDto {
     private List<String> hashtags;
     private String categoryName;
     private List<String> photoUrls;
+    private List<PostStickerDTO.PostStickerItem> postStickerItemList;
 
     public Post toEntity(PostRequestDto postRequestDto, String preview, Long blogId,
             Long memberId) {
