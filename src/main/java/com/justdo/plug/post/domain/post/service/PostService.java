@@ -92,7 +92,7 @@ public class PostService {
 
         List<PostStickerDTO.PostStickerItem> postStickerItems = stickerClient.getStickersByPostId(postId);
 
-        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls, postStickerItems, nickname);
+        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, photoUrls, postStickerItems, nickname);
 
     }
 
