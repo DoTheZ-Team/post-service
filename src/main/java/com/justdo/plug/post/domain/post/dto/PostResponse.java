@@ -86,13 +86,13 @@ public class PostResponse {
         private List<String> photoUrls;
 
         @Schema(description = "포스트의 스티커 정보")
-        PostStickerDTO.PostStickerUrlItems postStickerUrlItems;
+        private List<PostStickerDTO.PostStickerItem> postStickerItems;
 
     }
 
     // SUB: 게시글 반환 함수
     public static PostResponse.PostDetail toPostDetail(Post post, boolean isLike,
-            boolean isSubscribe, List<String> postHashtags, String categoryName, List<String> photoUrls, PostStickerDTO.PostStickerUrlItems postStickerUrlItems, String nickname) {
+            boolean isSubscribe, List<String> postHashtags, String categoryName, List<String> photoUrls, List<PostStickerDTO.PostStickerItem> postStickerItems, String nickname) {
 
         String JsonContent = post.getContent();
         JSONArray jsonArray = new JSONArray(JsonContent);
@@ -115,7 +115,7 @@ public class PostResponse {
                 .postHashtags(postHashtags)
                 .categoryName(categoryName)
                 .photoUrls(photoUrls)
-                .postStickerUrlItems(postStickerUrlItems)
+                .postStickerItems(postStickerItems)
                 .build();
 
     }

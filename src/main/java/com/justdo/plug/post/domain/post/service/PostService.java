@@ -109,10 +109,10 @@ public class PostService {
         String nickname = authClient.getMemberName(memberId);
 
 
-        PostStickerDTO.PostStickerUrlItems postStickerUrlItems = stickerClient.getStickersByPostId(postId);
+        List<PostStickerDTO.PostStickerItem> postStickerItems = stickerClient.getStickersByPostId(postId);
 
 
-        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls, postStickerUrlItems, nickname);
+        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls, postStickerItems, nickname);
     }
 
     // BLOG003: 블로그 작성
