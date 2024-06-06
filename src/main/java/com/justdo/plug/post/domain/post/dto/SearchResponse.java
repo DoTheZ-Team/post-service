@@ -171,6 +171,9 @@ public class SearchResponse {
         @Schema(description = "전체 데이터의 개수")
         private Long totalElements;
 
+        @Schema(description = "추가 목록이 있는 지의 여부")
+        private Boolean hasNext;
+
         @Schema(description = "첫 페이지의 여부")
         private Boolean isFirst;
 

@@ -15,6 +15,7 @@ import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
 import com.justdo.plug.post.domain.post.dto.SearchResponse;
 import com.justdo.plug.post.domain.post.service.PostService;
 import com.justdo.plug.post.domain.posthashtag.service.PostHashtagService;
+import com.justdo.plug.post.domain.sticker.PostStickerDTO;
 import com.justdo.plug.post.global.response.ApiResponse;
 import com.justdo.plug.post.global.utils.JwtProvider;
 import io.swagger.v3.oas.annotations.Operation;
@@ -73,12 +74,24 @@ public class PostController {
         String token = jwtProvider.parseToken(request);
 
         Post post = postService.save(requestDto, blogId, memberId);
+        Long postId = post.getId();
 
         postHashtagService.createHashtag(requestDto.getHashtags(), post);
 
         photoService.createPhoto(requestDto.getPhotoUrls(), post);
 
         postHashtagService.sendNewHashtags(blogId, requestDto.getHashtags(), token);
+
+        // 5. Sticker Service 로 Sticker 정보 보내주기
+        List<PostStickerDTO.PostStickerItem> postStickerItemList = requestDto.getPostStickerItemList();
+        if (postStickerItemList != null) {
+            for (PostStickerDTO.PostStickerItem item : postStickerItemList) {
+
+                item.setPostId(postId);
+            }
+        }
+
+        postService.sendSticker(postStickerItemList);
 
         return ApiResponse.onSuccess("게시글이 성공적으로 업로드 되었습니다");
     }

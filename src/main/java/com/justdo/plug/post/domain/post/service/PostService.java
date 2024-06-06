@@ -89,10 +89,10 @@ public class PostService {
 
         boolean isSubscribe = blogClient.checkSubscribeById(loginSubscription);
         String nickname = authClient.getMemberName(memberId);
-        PostStickerDTO.PostStickerUrlItems postStickerUrlItems = stickerClient.getStickers(postId);
 
-        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags,
-                photoUrls, postStickerUrlItems, nickname);
+        List<PostStickerDTO.PostStickerItem> postStickerItems = stickerClient.getStickersByPostId(postId);
+
+        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, categoryName, photoUrls, postStickerItems, nickname);
 
     }
 
@@ -385,6 +385,10 @@ public class PostService {
         return postRepository.findById(postId).orElseThrow(
                 () -> new ApiException(ErrorStatus._POST_NOT_FOUND)
         );
+    }
+
+    public void sendSticker(List<PostStickerDTO.PostStickerItem> postStickerItemList) {
+        stickerClient.savePostStickers(postStickerItemList);
     }
 
 }
