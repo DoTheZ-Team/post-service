@@ -84,7 +84,7 @@ public class PostController {
         photoService.createPhoto(requestDto.getPhotoUrls(), post);
 
         postHashtagService.sendNewHashtags(blogId, requestDto.getHashtags(), token);
-
+        System.out.println("requestDto = " + requestDto.getPostStickerItemList());
         // 5. Sticker Service 로 Sticker 정보 보내주기
         List<PostStickerDTO.PostStickerItem> postStickerItemList = requestDto.getPostStickerItemList();
         if (postStickerItemList != null) {

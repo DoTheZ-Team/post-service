@@ -138,6 +138,8 @@ public class SearchResponse {
     @NoArgsConstructor
     @Getter
     public static class BlogInfo {
+        @Schema(description = "블로그 아이디", example = "1")
+        private Long id;
 
         @Schema(description = "블로그 제목")
         private String title;
