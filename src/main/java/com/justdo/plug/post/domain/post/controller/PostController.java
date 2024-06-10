@@ -11,7 +11,7 @@ import com.justdo.plug.post.domain.post.dto.PostResponse.PostProc;
 import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.BlogPostItem;
-import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
+import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemBy5Photo;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
 import com.justdo.plug.post.domain.post.dto.SearchResponse;
 import com.justdo.plug.post.domain.post.service.PostService;
@@ -70,7 +70,6 @@ public class PostController {
     public ApiResponse<PostProc> PostBlog(HttpServletRequest request,
             @RequestBody PostRequestDto requestDto)
             throws JsonProcessingException {
-
 
         Long memberId = jwtProvider.getUserIdFromToken(request);
         Long blogId = postService.getBlogIdByMemberId(memberId);
@@ -160,7 +159,7 @@ public class PostController {
 
         List<Post> recent4Post = postService.getRecent4Post(blogId);
 
-        List<PostItem> postItemList = postService.getPostItemList(recent4Post);
+        List<PostItemBy5Photo> postItemList = postService.getPostItemList(recent4Post);
         List<String> hashtagNames = postHashtagService.getHashtagNamesByPost(recent4Post);
 
         return PreviewResponse.toBlogPostItem(postItemList, hashtagNames);

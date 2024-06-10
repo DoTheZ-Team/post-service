@@ -59,6 +59,47 @@ public class PreviewResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
+    public static class PostItemBy5Photo {
+
+        @Schema(description = "Blog 아이디")
+        private Long blogId;
+
+        @Schema(description = "Post 아이디")
+        private Long postId;
+
+        @Schema(description = "Post 제목")
+        private String title;
+
+        @Schema(description = "Post 글 미리보기")
+        private String preview;
+
+        @Schema(description = "Post의 추가된 사진 경로")
+        private List<String> photoUrl;
+    }
+
+    public static PostItemBy5Photo toPostItemBy5Photo(Post post, List<String> photoUrl) {
+        return PostItemBy5Photo.builder()
+                .blogId(post.getBlogId())
+                .postId(post.getId())
+                .title(post.getTitle())
+                .preview(post.getPreview())
+                .photoUrl(photoUrl)
+                .build();
+    }
+
+    public static List<PostItemBy5Photo> toPostItemBy5Photo(List<Post> posts, List<List<String>> photoUrls) {
+
+        return IntStream.range(0, posts.size())
+                .mapToObj(idx -> {
+                    return toPostItemBy5Photo(posts.get(idx), photoUrls.get(idx));
+                })
+                .toList();
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
     public static class PostItemSlice {
 
         private List<PostItem> postItems;
@@ -144,13 +185,13 @@ public class PreviewResponse {
     @Builder
     public static class BlogPostItem {
 
-        private List<PostItem> postItems;
+        private List<PostItemBy5Photo> postItems;
 
         @Schema(description = "Post에 작성된 해시태그 목록")
         private List<String> hashtagNames;
     }
 
-    public static BlogPostItem toBlogPostItem(List<PostItem> postItems, List<String> hashtagNames) {
+    public static BlogPostItem toBlogPostItem(List<PostItemBy5Photo> postItems, List<String> hashtagNames) {
 
         return BlogPostItem.builder()
                 .postItems(postItems)
