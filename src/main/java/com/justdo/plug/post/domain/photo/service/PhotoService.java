@@ -42,6 +42,23 @@ public class PhotoService {
                 .toList();
     }
 
+    public List<String> findTop5PhotoByPostId(Long postId) {
+
+        List<String> photoList = photoRepository.findTop5ByPostId(postId)
+                .stream()
+                .map(Photo::getPhotoUrl)
+                .toList();
+
+        return photoList.isEmpty() ? null : photoList;
+    }
+
+    public List<List<String>> findTop5PhotoUrlsByPosts(List<Post> posts) {
+
+        return posts.stream()
+                .map(post -> findTop5PhotoByPostId(post.getId()))
+                .toList();
+    }
+
     public List<String> findPhotoUrlsByPostId(Long postId) {
 
         List<Photo> photos = photoRepository.findAllByPostId(postId);

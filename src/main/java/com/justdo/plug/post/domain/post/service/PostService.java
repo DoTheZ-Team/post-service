@@ -16,7 +16,7 @@ import com.justdo.plug.post.domain.post.dto.PostRequestDto;
 import com.justdo.plug.post.domain.post.dto.PostResponse;
 import com.justdo.plug.post.domain.post.dto.PostUpdateDto;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse;
-import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItem;
+import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemBy5Photo;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.PostItemSlice;
 import com.justdo.plug.post.domain.post.dto.PreviewResponse.StoryItem;
 import com.justdo.plug.post.domain.post.dto.SearchResponse;
@@ -91,9 +91,11 @@ public class PostService {
         boolean isSubscribe = blogClient.checkSubscribeById(loginSubscription);
         String nickname = authClient.getMemberName(memberId);
 
-        List<PostStickerResponseDTO.PostStickerItem> postStickerItems = stickerClient.getStickersByPostId(postId);
+        List<PostStickerResponseDTO.PostStickerItem> postStickerItems = stickerClient.getStickersByPostId(
+                postId);
 
-        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, photoUrls, postStickerItems, nickname);
+        return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, photoUrls,
+                postStickerItems, nickname);
 
     }
 
@@ -294,11 +296,11 @@ public class PostService {
     }
 
     // 최신 postItem 4개 조회
-    public List<PostItem> getPostItemList(List<Post> posts) {
+    public List<PostItemBy5Photo> getPostItemList(List<Post> posts) {
 
-        List<String> photoUrls = photoService.findPhotoUrlsByPosts(posts);
+        List<List<String>> photoUrls = photoService.findTop5PhotoUrlsByPosts(posts);
 
-        return PreviewResponse.toPostItemList(posts, photoUrls);
+        return PreviewResponse.toPostItemBy5Photo(posts, photoUrls);
     }
 
     // 최신 post 4개 조회
