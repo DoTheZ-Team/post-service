@@ -11,6 +11,8 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
 
     Optional<Photo> findFirstByPostId(Long postId);
 
+    List<Photo> findTop5ByPostId(Long postId);
+
     List<Photo> findAllByPostId(Long postId);
 
     void deleteByPostId(Long postId);
