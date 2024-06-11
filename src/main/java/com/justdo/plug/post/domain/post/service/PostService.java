@@ -78,17 +78,23 @@ public class PostService {
     private String apiKey;
 
     // BLOG002: 게시글 상세 페이지 조회
-    public PostResponse.PostDetail getPostById(Long postId, Long memberId, boolean isLike) {
+    public PostResponse.PostDetail getPostById(Post post, Long memberId, boolean isLike) {
 
-        Post post = getPost(postId);
-
+        Long postId = post.getId();
         List<String> postHashtags = postHashtagService.getPostHashtagNames(postId);
         List<String> photoUrls = photoService.findPhotoUrlsByPostId(postId);
 
-        SubscriptionRequest.LoginSubscription loginSubscription = new SubscriptionRequest.LoginSubscription(
-                memberId, post.getBlogId());
 
-        boolean isSubscribe = blogClient.checkSubscribeById(loginSubscription);
+        boolean isSubscribe;
+
+        if (memberId == null) {
+            isSubscribe = false;
+        } else {
+            SubscriptionRequest.LoginSubscription loginSubscription = new SubscriptionRequest.LoginSubscription(
+                    memberId, post.getBlogId());
+            isSubscribe = blogClient.checkSubscribeById(loginSubscription);
+        }
+
         String nickname = authClient.getMemberName(memberId);
 
         List<PostStickerResponseDTO.PostStickerItem> postStickerItems = stickerClient.getStickersByPostId(
