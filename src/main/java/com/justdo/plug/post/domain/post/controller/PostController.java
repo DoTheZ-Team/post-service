@@ -55,14 +55,23 @@ public class PostController {
     @Operation(summary = "특정 게시글 상세 페이지 조회 요청", description = "특정 게시글의 상세 페이지를 요청합니다(제목, 글, 좋아요 갯수, 현재 사용자가 좋아요 했는지 여부 등)")
     @Parameter(name = "postId", description = "포스트의 id, Path Variable 입니다", required = true, in = ParameterIn.PATH)
     public ApiResponse<PostResponse.PostDetailResult> ViewPage(HttpServletRequest request,
-            @PathVariable Long postId) {
+                                                               @PathVariable Long postId) {
+        Post post = postService.getPost(postId);
+        Long postMemberId = post.getMemberId();
+        Long memberId = null;
 
-        Long memberId = jwtProvider.getUserIdFromToken(request);
-        boolean isLike = likesService.isLike(memberId, postId);
-        PostDetail postDetail = postService.getPostById(postId, memberId, isLike);
+        try {
+            memberId = jwtProvider.getUserIdFromToken(request);
+        } catch (Exception e) {
+           e.toString();
+        }
+
+        boolean isLike = memberId != null && likesService.isLike(memberId, postId);
+        PostDetail postDetail = postService.getPostById(post, postMemberId, isLike);
 
         return ApiResponse.onSuccess(PostResponse.toPostDetailResult(memberId, postDetail));
     }
+
 
     @PostMapping()
     @Operation(summary = "게시글 작성 요청", description = "해당(본인) 블로그에 게시글을 작성합니다")
@@ -73,9 +82,12 @@ public class PostController {
 
         Long memberId = jwtProvider.getUserIdFromToken(request);
         Long blogId = postService.getBlogIdByMemberId(memberId);
+
+
         String token = jwtProvider.parseToken(request);
 
         Post post = postService.save(requestDto, blogId, memberId);
+
         Long postId = post.getId();
 
         postHashtagService.createHashtag(requestDto.getHashtags(), post);
