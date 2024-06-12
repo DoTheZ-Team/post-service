@@ -17,9 +17,6 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Builder
 public class PostDocument {
 
-    @Id
-    private String id;
-
     @Field(type = FieldType.Long, index = false)
     private Long postId;
 
