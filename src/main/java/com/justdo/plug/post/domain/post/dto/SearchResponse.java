@@ -27,26 +27,11 @@ public class SearchResponse {
         @Schema(description = "Post Preview : 포스트 글 부분")
         private String preview;
 
-        @Schema(description = "Post가 작성된 Blog 아이디")
-        private Long blogId;
-
         @Schema(description = "작성자 Member Id")
         private Long memberId;
 
-        @Schema(description = "ES 관련 데이터")
-        private String _class;
-
-        @Schema(description = "사용된 해시태그")
-        private List<String> hashtags;
-
-        @Schema(description = "사용된 이미지 주소")
-        private List<String> photoUrl;
-
-        @Schema(description = "Post이 카테고리")
-        private String categoryName;
-
-        @Schema(description = "Post 내용")
-        private String content;
+        @Schema(description = "Post가 작성된 Blog 아이디")
+        private Long blogId;
 
     }
 
