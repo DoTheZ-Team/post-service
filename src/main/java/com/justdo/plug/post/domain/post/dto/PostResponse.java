@@ -44,6 +44,9 @@ public class PostResponse {
         @Schema(description = "사용자 nickname")
         private String nickname;
 
+        @Schema(description = "사용자 profile URL")
+        private String profile;
+
         @Schema(description = "포스트 ID")
         private Long postId;
 
@@ -93,7 +96,7 @@ public class PostResponse {
 
     // SUB: 게시글 반환 함수
     public static PostResponse.PostDetail toPostDetail(Post post, boolean isLike,
-            boolean isSubscribe, List<String> postHashtags, List<String> photoUrls, List<PostStickerResponseDTO.PostStickerItem> postStickerItems, String nickname) {
+            boolean isSubscribe, List<String> postHashtags, List<String> photoUrls, List<PostStickerResponseDTO.PostStickerItem> postStickerItems, String nickname, String profile) {
 
         List<Object> contentList = new Gson().fromJson(post.getContent(),
                 new TypeToken<List<Object>>() {
@@ -101,6 +104,7 @@ public class PostResponse {
 
         return PostDetail.builder()
                 .nickname(nickname)
+                .profile(profile)
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(contentList)
