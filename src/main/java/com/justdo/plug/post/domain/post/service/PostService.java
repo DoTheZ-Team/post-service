@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justdo.plug.post.domain.auth.AuthClient;
 import com.justdo.plug.post.domain.blog.BlogClient;
 import com.justdo.plug.post.domain.blog.SubscriptionRequest;
+import com.justdo.plug.post.domain.blog.SubscriptionResponse;
 import com.justdo.plug.post.domain.comment.repository.CommentRepository;
 import com.justdo.plug.post.domain.likes.repository.LikesRepository;
 import com.justdo.plug.post.domain.photo.Photo;
@@ -86,14 +87,20 @@ public class PostService {
 
 
         boolean isSubscribe;
+        SubscriptionRequest.LoginSubscription loginSubscription = SubscriptionRequest.toLoginSubscription(
+                memberId, post.getBlogId());
+      
+        SubscriptionResponse.SubscribedProfile subscribedProfile = blogClient.checkSubscribeById(loginSubscription);
 
         if (memberId == null) {
             isSubscribe = false;
         } else {
-            SubscriptionRequest.LoginSubscription loginSubscription = new SubscriptionRequest.LoginSubscription(
-                    memberId, post.getBlogId());
-            isSubscribe = blogClient.checkSubscribeById(loginSubscription);
+            isSubscribe = subscribedProfile.isSubscribed();
+
         }
+
+        
+        String profile = subscribedProfile.getProfile();
 
         String nickname = authClient.getMemberName(memberId);
 
@@ -101,7 +108,7 @@ public class PostService {
                 postId);
 
         return PostResponse.toPostDetail(post, isLike, isSubscribe, postHashtags, photoUrls,
-                postStickerItems, nickname);
+                postStickerItems, nickname, profile);
 
     }
 
